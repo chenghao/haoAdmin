@@ -76,11 +76,15 @@ class SingletonDogpile(type):
 	"""
 	def __init__(cls, name, bases, dict):
 		super(SingletonDogpile, cls).__init__(name, bases, dict)
-		cls._instances_cache = None
-		cls._instances_session = None
+		cls._instances_cache_m = None
+		cls._instances_cache_f = None
+		cls._instances_session_m = None
+		cls._instances_session_m = None
 
 	def __call__(cls, *args, **kwargs):
-		if cls._instances_cache is None and cls._instances_session is None:
+		if cls._instances_cache_m is None and cls._instances_cache_f is None \
+			and cls._instances_session_m is None and cls._instances_session_m is None:
+
 			super(SingletonDogpile, cls).__call__(*args, **kwargs)
 			conf = Conf()
 			file_path = conf.get("dogpile", "cache.file.arguments.filename")
@@ -101,9 +105,11 @@ class SingletonDogpile(type):
 				"session.file.expiration_time": conf.get("dogpile", "session.file.expiration_time"),
 				"session.file.arguments.filename": conf.get("dogpile", "session.file.arguments.filename")
 			}
-			cls._instances_cache = make_region().configure_from_config(dogpile_conf, "cache.memory.")
-			cls._instances_session = make_region().configure_from_config(dogpile_conf, "session.file.")
-		return cls._instances_cache, cls._instances_session
+			cls._instances_cache_m = make_region().configure_from_config(dogpile_conf, "cache.memory.")
+			cls._instances_cache_f = make_region().configure_from_config(dogpile_conf, "cache.file.")
+			cls._instances_session_m = make_region().configure_from_config(dogpile_conf, "session.memory.")
+			cls._instances_session_f = make_region().configure_from_config(dogpile_conf, "session.file.")
+		return cls._instances_cache_m, cls._instances_cache_f, cls._instances_session_m, cls._instances_session_f
 
 
 class Dogpiles(object):
@@ -111,6 +117,22 @@ class Dogpiles(object):
 	获取缓存实例
 	"""
 	__metaclass__ = SingletonDogpile
+
+
+def get_cache_memory():
+	return Dogpiles()[0]
+
+
+def get_cache_file():
+	return Dogpiles()[1]
+
+
+def get_session_memory():
+	return Dogpiles()[2]
+
+
+def get_session_file():
+	return Dogpiles()[3]
 
 
 if __name__ == "__main__":

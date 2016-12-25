@@ -141,7 +141,7 @@ class HUserOrg(BaseModel):
 
 
 if __name__ == "__main__":
-	from haoAdmin.util import singletons
+	from util import singletons
 	from playhouse import shortcuts
 
 	user = HUser.select().where(HUser.pid == 1)

@@ -12,8 +12,8 @@ def get_user_id():
 	:return:
 	"""
 	cookie_id = request.get_cookie(conf.ADMIN_COOKIE)
-	dogpile_session = singletons.Dogpiles()[1]
-	result = dogpile_session.get(cookie_id)
+	dogpile_session_f = singletons.get_session_file()
+	result = dogpile_session_f.get(cookie_id)
 	if result:
 		user_id = result.get("pid")
 	else:
