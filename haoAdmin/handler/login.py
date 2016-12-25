@@ -11,7 +11,7 @@ login_app = Bottle()
 login_app.install(JSONPlugin(json_dumps=lambda s: dumps(s, cls=util.ComplexEncoder)))
 
 
-@login_app.get("/login", apply=[view("./login/login")])
+@login_app.get("/login", apply=[view("../login/login")])
 def login():
 	"""
 	显示登录页面, 如果已经登录就重定向到后台管理主页
