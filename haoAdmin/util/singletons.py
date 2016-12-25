@@ -101,7 +101,7 @@ class SingletonDogpile(type):
 				"session.file.expiration_time": conf.get("dogpile", "session.file.expiration_time"),
 				"session.file.arguments.filename": conf.get("dogpile", "session.file.arguments.filename")
 			}
-			cls._instances_cache = make_region().configure_from_config(dogpile_conf, "cache.file.")
+			cls._instances_cache = make_region().configure_from_config(dogpile_conf, "cache.memory.")
 			cls._instances_session = make_region().configure_from_config(dogpile_conf, "session.file.")
 		return cls._instances_cache, cls._instances_session
 
