@@ -178,6 +178,8 @@ layui.define(['element', 'common'], function(exports) {
 	 * @param {Object} data
 	 */
 	function getHtml(data) {
+		data = data.two_level_menu;
+
 		var ulHtml = '<ul class="layui-nav layui-nav-tree">';
 		for(var i = 0; i < data.length; i++) {
 			if(data[i].spread) {

@@ -64,12 +64,12 @@ class HMenu(BaseModel):
 	"""
 	菜单表
 	"""
-	is_active = CharField(max_length=1)
 	level = IntegerField(null=True)
 	menu_name = CharField(max_length=50)
-	menu_url = CharField(max_length=500)
+	menu_url = CharField(null=True, max_length=500)
 	parent_menu = ForeignKeyField('self', null=True, related_name='children', db_column="parent_menu")
 	sort = IntegerField()
+	icon = CharField()
 
 	class Meta:
 		db_table = 'h_menu'
@@ -181,7 +181,7 @@ if __name__ == "__main__":
 		HUserOrg, on=(HUser.pid == HUserOrg.user)
 	).join(
 		HOrg, on=(HUserOrg.org == HOrg.pid)
-	).where(HMenu.is_active == 'Y' , HMenu.parent_menu == None , HRoleUser.user == 1).order_by(HMenu.sort)
+	).where(HMenu.parent_menu == None , HRoleUser.user == 1).order_by(HMenu.sort)
 	print menu
 	print [r for r in menu.dicts()]
 

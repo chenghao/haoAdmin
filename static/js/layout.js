@@ -18,20 +18,6 @@ layui.config({
 		});
 	}).resize();
 
-	var ccc  =[
-
-	{
-		"title": "会员列表",
-		"icon": "fa-check-square-o",
-		"href": "https:www.baidu.com"
-	},{
-		"title": "会员等级",
-		"icon": "fa-check-square-o",
-		"href": "level.html"
-	}
-
- ]
-
 	var $menu = $('#menu');
 	$menu.find('li.layui-nav-item').each(function() {
 		var $this = $(this);
@@ -40,15 +26,16 @@ layui.config({
 			//获取设置的模块ID
 			var id = $this.find('a').data('module-id');
 			//这里的数据源只是演示时用的，实际需求可能通过远程读取（根据模块ID来获取对应模块的信息）
-			var url;
-			switch(id) {
-				case 1:
-					url = 'ccc';
-					break;
+			var url = remoteUrl + "get_child_menu?parent_id=" + id;
 
+			/*switch(id) {
+				case 1:
+					url = ccc;
+					break;
 				default:
 					break;
-			}
+			}*/
+
 			//设置数据源有两个方式。
 			//第一：在此页面通过ajax读取设置  举个栗子：
 			//---------这是第一个栗子----------
@@ -78,7 +65,7 @@ layui.config({
 			//设置navbar
 			navbar.set({
 				elem: '#side', //存在navbar数据的容器ID
-				data: url
+				url: url
 			});
 			//渲染navbar
 			navbar.render();

@@ -36,3 +36,19 @@ function ajaxReq(url, callback, param, method, async, error){
         }
     })
 }
+
+function _confirm(msg, callback1, callback2){
+    layer.confirm(msg, {
+        btn: ['确定', '取消'] //按钮
+    }, function (index) {
+        layer.close(index);
+
+        if (callback1){
+            callback1();
+        }
+    }, function () {
+        if (callback2){
+            callback2();
+        }
+    });
+}

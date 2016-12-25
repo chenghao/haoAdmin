@@ -4,6 +4,7 @@ __author__ = "chenghao"
 from bottle import Bottle, request, redirect, response, jinja2_view as view
 import handler, util, conf
 from dal.haoAdmin import user
+from dal import haoAdmin
 from util import singletons
 
 login_app = Bottle()
@@ -43,8 +44,20 @@ def login():
 		path = conf_.get("cookie", "path")
 		response.set_cookie(conf.ADMIN_COOKIE, cookie_id, max_age=max_age, path=path)
 
-		# 获取菜单
+		# 获取一级菜单,并缓存
+		one_level_menu = haoAdmin.get_menu(result.get("pid"))
+		cache_memory = singletons.get_cache_memory()
+		cache_memory.set("one_level_menu", one_level_menu)
 
 		return {"code": 0}
 	else:
 		return {"code": -1, "msg": "用户名或密码错误"}
+
+
+@login_app.post("/logout")
+def logout():
+	cookie_id = request.get_cookie(conf.ADMIN_COOKIE)
+	dogpile_session_f = singletons.get_session_file()
+	dogpile_session_f.delete(cookie_id)
+	response.set_cookie(conf.ADMIN_COOKIE, "")
+	return {"code": 0}

@@ -6,6 +6,12 @@ import util
 
 
 def login(login_name, login_pwd):
+	"""
+	根据账号和密码登录
+	:param login_name:
+	:param login_pwd:
+	:return:
+	"""
 	if not login_name and not login_pwd:
 		return None
 	else:
@@ -14,3 +20,4 @@ def login(login_name, login_pwd):
 		if len(user):
 			return [r for r in user.dicts()][0]
 		return None
+
