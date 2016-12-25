@@ -21,30 +21,27 @@ class BaseModel(Model):
 		database = database
 
 
-class BaseModel2(Model):
-	class Meta:
-		database = database
-
-
 class HOrg(BaseModel):
 	"""
 	机构表
 	"""
+	description = CharField(null=True, max_length=100)  # 机构描述
 	name = CharField(max_length=50)  # 机构名称
 	parent_org = ForeignKeyField('self', null=True, related_name='children', db_column="parent_org")
 
 	class Meta:
-		db_table = "h_org"
+		db_table = 'h_org'
 
 
 class HRole(BaseModel):
 	"""
 	角色表
 	"""
-	name = CharField(max_length=20)  # 角色名
+	role_code = CharField(max_length=20)  # 角色code
+	role_name = CharField(max_length=20)  # 角色名
 
 	class Meta:
-		db_table = "h_role"
+		db_table = 'h_role'
 
 
 class HUser(BaseModel):
@@ -53,62 +50,99 @@ class HUser(BaseModel):
 	"""
 	login_name = CharField(max_length=20, unique=True)  # 登录名
 	login_pwd = CharField(max_length=64)  # 登录密码
+	phone = CharField(null=True, max_length=16)
+	qq = CharField(null=True, max_length=12)
+	sex = IntegerField(null=True)
 	user_name = CharField(max_length=20)  # 用户名
-	org = ForeignKeyField(HOrg)  # 所属机构
-	role = ForeignKeyField(HRole)  # 所属角色
+	wx = CharField(null=True, max_length=20)
 
 	class Meta:
-		db_table = "h_user"
+		db_table = 'h_user'
 
 
 class HMenu(BaseModel):
 	"""
 	菜单表
 	"""
+	is_active = CharField(max_length=1)
+	level = IntegerField(null=True)
 	menu_name = CharField(max_length=50)
 	menu_url = CharField(max_length=500)
-	is_active = CharField(max_length=1)
-	sort = IntegerField()
 	parent_menu = ForeignKeyField('self', null=True, related_name='children', db_column="parent_menu")
+	sort = IntegerField()
 
 	class Meta:
-		db_table = "h_menu"
+		db_table = 'h_menu'
 
 
-class HTypeGroup(BaseModel):
+class HTypegroup(BaseModel):
 	group_name = CharField(max_length=20)
 	group_value = CharField(max_length=20, unique=True)
-	is_active = CharField(max_length=1)
 
 	class Meta:
-		db_table = "h_typegroup"
+		db_table = 'h_typegroup'
 
 
 class HType(BaseModel):
+	group = ForeignKeyField(HTypegroup, db_column='group_id')
 	type_name = CharField(max_length=20)
-	type_value = CharField(max_length=20, unique=True)
-	is_active = CharField(max_length=1)
-	group = ForeignKeyField(HTypeGroup)
+	type_value = CharField(max_length=20)
 
 	class Meta:
-		db_table = "h_type"
+		db_table = 'h_type'
 
 
-class HUserRoleMenu(BaseModel2):
+class HRoleMenu(BaseModel):
 	"""
-	用户表、角色表和菜单表关联关系
+	角色和菜单关联关系表
 	"""
-	user = ForeignKeyField(HUser)
-	role = ForeignKeyField(HRole)
-	menu = ForeignKeyField(HMenu)
+	menu = ForeignKeyField(HMenu, db_column='menu_id')
+	role = ForeignKeyField(HRole, db_column='role_id')
 
 	class Meta:
-		db_table = "h_user_role_menu"
-		primary_key = CompositeKey('user', 'role', 'menu')
+		db_table = 'h_role_menu'
+		primary_key = CompositeKey('menu', 'role')
+
+
+class HRoleOrg(BaseModel):
+	"""
+	角色和机构关联关系表
+	"""
+	org = ForeignKeyField(HOrg, db_column='org_id')
+	role = ForeignKeyField(HRole, db_column='role_id')
+
+	class Meta:
+		db_table = 'h_role_org'
+		primary_key = CompositeKey('org', 'role')
+
+
+class HRoleUser(BaseModel):
+	"""
+	角色和用户关联关系表
+	"""
+	role = ForeignKeyField(HRole, db_column='role_id')
+	user = ForeignKeyField(HUser, db_column='user_id')
+
+	class Meta:
+		db_table = 'h_role_user'
+		primary_key = CompositeKey('user', 'role')
+
+
+class HUserOrg(BaseModel):
+	"""
+	用户和机构关联关系表
+	"""
+	org = ForeignKeyField(HOrg, db_column='org_id')
+	user = ForeignKeyField(HUser, db_column='user_id')
+
+	class Meta:
+		db_table = 'h_user_org'
+		primary_key = CompositeKey('user', 'org')
 
 
 if __name__ == "__main__":
 	from haoAdmin.util import singletons
+	from playhouse import shortcuts
 
 	user = HUser.select().where(HUser.pid == 1)
 	print user
@@ -120,25 +154,17 @@ if __name__ == "__main__":
 	for u in user:
 		print u.login_name, u.user_name
 
-		org = u.org
-		role = u.role
-		print org.name, role.name
-
 	user = dogpile_cache.get("login_user")
 	print user
 	for u in user:
 		print u.login_name, u.user_name
 
-		org = u.org
-		role = u.role
-		print org.name, role.name
-
-	userRoleMenu = HUserRoleMenu.select().where(HUserRoleMenu.user == 1)
-	print userRoleMenu
-	for urm in userRoleMenu:
-		user = urm.user
-		role = urm.role
-		menu = urm.menu
-		print user.user_name, role.name, menu.menu_name
+	roleUser = HRoleUser.select().where(HRoleUser.user == 1)
+	print roleUser
+	print [shortcuts.model_to_dict(r) for r in roleUser]
+	for ru in roleUser:
+		user = ru.user
+		role = ru.role
+		print user.user_name, role.role_name, role.role_code
 
 

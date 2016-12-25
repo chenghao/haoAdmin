@@ -45,11 +45,11 @@ class SingletonLog(type):
 			super(SingletonLog, cls).__call__(*args, **kwargs)
 			conf = Conf()
 			# 按每天生成日志文件 linux
-			log_file_path = conf.get("log", "path")
-			if not os.path.exists(log_file_path):
-				os.makedirs(log_file_path)
-			log_handler = handlers.TimedRotatingFileHandler(log_file_path + "/haoAdmin", conf.get("log", "when"),
-															conf.getint("log", "interval"))
+			file_path = conf.get("log", "path")
+			parent_path = os.path.dirname(file_path)
+			if not os.path.exists(parent_path):
+				os.makedirs(parent_path)
+			log_handler = handlers.TimedRotatingFileHandler(file_path, conf.get("log", "when"), conf.getint("log", "interval"))
 			# 格式化日志内容
 			format_ = "%(asctime)s %(pathname)-5s %(funcName)-5s %(lineno)-5s %(levelname)-5s %(message)s"
 			log_formatter = logging.Formatter(format_)
@@ -118,7 +118,7 @@ if __name__ == "__main__":
 	print conf.get("mysql", "db")
 
 	log = Log()
-	log.info("aaaaaaaaaaa")
+	log.info("wwwwwwwwwwww")
 
 	dogpiles = Dogpiles()
 	dogpile_cache = dogpiles[1]

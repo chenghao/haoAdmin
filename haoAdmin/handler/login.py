@@ -3,7 +3,8 @@ __author__ = "chenghao"
 
 from bottle import Bottle, request, redirect, response, JSONPlugin, jinja2_view as view
 from json import dumps
-from haoAdmin import handler, util, conf
+import haoAdmin
+from haoAdmin import handler, util
 from haoAdmin.dal import user
 
 login_app = Bottle()
@@ -18,7 +19,7 @@ def login():
 	"""
 	pid = handler.get_user_id()
 	if pid:
-		redirect(conf.ADMIN_PREFIX)
+		redirect(haoAdmin.ADMIN_PREFIX)
 	else:
 		return {}
 
@@ -32,7 +33,7 @@ def login():
 	login_name = request.params.getunicode("login_name")
 	login_pwd = request.params.getunicode("login_pwd")
 
-	result = admin_dal.login(login_name, login_pwd)
+	result = user.login(login_name, login_pwd)
 	if result:
 		# 设置 cookie
 		cookie_id = util.random_num()
