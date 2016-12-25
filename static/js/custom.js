@@ -2,13 +2,13 @@
  * Created by chenghao on 16-12-2.
  */
 
-var serverUrl = "/";
+var remoteUrl = "/admin/";
 
 success_layer_option = {icon: 1, time: 2000};
 error_layer_option = {icon: 5, time: 2000};
 
 function getPrefixPath(url) {
-    return serverUrl + url;
+    return remoteUrl + url;
 }
 
 function customHref(url) {

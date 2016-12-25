@@ -53,15 +53,14 @@
 					$("#commonForm").ajaxForm({
 						resetForm: true,
 						dataType: "json",
-						url: getPrefixPath("haoAdmin/login"),
+						url: getPrefixPath("login"),
 						beforeSubmit: function () {
 							layer.load();
 						},
 						success: function (d) {
 							layer.closeAll('loading');
-							console.log(d)
 							if(d.code == 0){
-
+								customHref("")
 							}else{
 								layer.msg(d.msg, error_layer_option)
 							}

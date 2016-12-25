@@ -1,16 +1,12 @@
 #coding:utf-8
 __author__ = "chenghao"
 
-from bottle import Bottle, request, redirect, response, JSONPlugin, jinja2_view as view
-from json import dumps
+from bottle import Bottle, request, redirect, response, jinja2_view as view
 import handler, util, conf
 from dal.haoAdmin import user
 from util import singletons
 
-
 login_app = Bottle()
-login_app.install(JSONPlugin(json_dumps=lambda s: dumps(s, cls=util.ComplexEncoder)))
-
 
 @login_app.get("/login", apply=[view("./haoAdmin/login/login")])
 def login():
