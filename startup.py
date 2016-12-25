@@ -3,6 +3,7 @@ __author__ = "chenghao"
 
 from bottle import Bottle, static_file
 from routes import Routes
+import conf
 
 bottle = Bottle()
 # Bottle Routes
