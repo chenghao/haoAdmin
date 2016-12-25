@@ -167,4 +167,22 @@ if __name__ == "__main__":
 		role = ru.role
 		print user.user_name, role.role_name, role.role_code
 
+	menu = HMenu.select(
+		HMenu.pid, HMenu.menu_name, HMenu.menu_url
+	).join(
+		HRoleMenu, on=(HMenu.pid == HRoleMenu.menu)
+	).join(
+		HRole, on=(HRoleMenu.role == HRole.pid)
+	).join(
+		HRoleUser, on=(HRole.pid == HRoleUser.role)
+	).join(
+		HUser, on=(HRoleUser.user == HUser.pid)
+	).join(
+		HUserOrg, on=(HUser.pid == HUserOrg.user)
+	).join(
+		HOrg, on=(HUserOrg.org == HOrg.pid)
+	).where(HMenu.is_active == 'Y' , HMenu.parent_menu == None , HRoleUser.user == 1).order_by(HMenu.sort)
+	print menu
+	print [r for r in menu.dicts()]
+
 

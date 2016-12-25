@@ -18,6 +18,20 @@ layui.config({
 		});
 	}).resize();
 
+	var ccc  =[
+
+	{
+		"title": "会员列表",
+		"icon": "fa-check-square-o",
+		"href": "https:www.baidu.com"
+	},{
+		"title": "会员等级",
+		"icon": "fa-check-square-o",
+		"href": "level.html"
+	}
+
+ ]
+
 	var $menu = $('#menu');
 	$menu.find('li.layui-nav-item').each(function() {
 		var $this = $(this);
@@ -29,11 +43,9 @@ layui.config({
 			var url;
 			switch(id) {
 				case 1:
-					url = 'datas/nav_content.json';
+					url = 'ccc';
 					break;
-				case 3:
-					url = 'datas/nav_member.json';
-					break;
+
 				default:
 					break;
 			}
@@ -66,7 +78,7 @@ layui.config({
 			//设置navbar
 			navbar.set({
 				elem: '#side', //存在navbar数据的容器ID
-				url: url
+				data: url
 			});
 			//渲染navbar
 			navbar.render();

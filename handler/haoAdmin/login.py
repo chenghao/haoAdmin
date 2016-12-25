@@ -8,6 +8,7 @@ from util import singletons
 
 login_app = Bottle()
 
+
 @login_app.get("/login", apply=[view("./haoAdmin/login/login")])
 def login():
 	"""
@@ -41,6 +42,8 @@ def login():
 		max_age = conf_.getint("cookie", "max_age")
 		path = conf_.get("cookie", "path")
 		response.set_cookie(conf.ADMIN_COOKIE, cookie_id, max_age=max_age, path=path)
+
+		# 获取菜单
 
 		return {"code": 0}
 	else:

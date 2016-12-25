@@ -5,8 +5,8 @@ import ConfigParser, os, logging
 from logging import handlers
 from dogpile.cache import make_region
 
-path = "./conf.ini"
-# path = "../conf.ini"
+# path = "./conf.ini"
+path = "../conf.ini"
 
 
 class SingletonConf(type):

@@ -15,3 +15,8 @@ admin_app.merge(login_app)
 @admin_app.get("/", apply=[view("./haoAdmin/index")])
 def index():
 	return {}
+
+
+@admin_app.get("/main", apply=[view("./haoAdmin/main")])
+def main():
+	return {}
