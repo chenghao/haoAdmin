@@ -16,10 +16,10 @@
 				<div class="beg-layout-main beg-layout-menu" id="menu">
 					<ul class="layui-nav beg-layout-nav" lay-filter="">
 						{% for m in menus %}
-							{% if m.index0 == 0 %}
+							{% if m.index == 0 %}
 								<li class="layui-nav-item layui-this">
 							{%else%}
-								<li class="layui-nav-item layui-this">
+								<li class="layui-nav-item">
 							{%endif%}
 								<a href="javascript:;" data-module-id="{{m.pid}}">
 									<i class="fa fa-desktop" aria-hidden="true"></i>

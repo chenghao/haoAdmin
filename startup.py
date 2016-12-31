@@ -4,10 +4,13 @@ __author__ = "chenghao"
 from bottle import Bottle, static_file
 from routes import Routes
 from util.middleware import LoginMiddleware
+import conf
 
 bottle = Bottle()
 # Bottle Routes
 bottle.merge(Routes)
+
+_admin = conf.ADMIN_PREFIX
 
 
 @bottle.get('/static/<filename:path>')
@@ -20,7 +23,7 @@ def static(filename):
     return static_file(filename, root='./upload/')
 
 
-app = LoginMiddleware(bottle, "/admin/*", ["/admin/login", "/admin/logout"])
+app = LoginMiddleware(bottle, _admin + "/*", [_admin + "/login", _admin + "/logout"])
 
 
 def dev_run():

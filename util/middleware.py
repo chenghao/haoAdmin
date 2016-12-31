@@ -2,6 +2,7 @@
 __author__ = "chenghao"
 
 import conf, handler
+from util import singletons
 
 
 class LoginMiddleware(object):
@@ -25,8 +26,8 @@ class LoginMiddleware(object):
             else:
                 if conf.ADMIN_PREFIX in path_info:
                     self.is_user_login(environ)
-
-        return self.app(environ, start_response)
+        app_ = self.app(environ, start_response)
+        return app_
 
     def is_user_login(self, environ):
         user_id = handler.get_user_id()
