@@ -14,6 +14,16 @@ def index():
     return {}
 
 
+@menu_app.get("/get_parent_menu")
+def get_parent_menu():
+    cache_m = singletons.get_cache_memory()
+    menus = cache_m.get("one_level_menu")
+    if isinstance(menus, api.NoValue):
+        menus = haoAdmin.get_menu()
+    one_level_menu = [r for r in menus.dicts()]
+    return {"one_level_menu": one_level_menu}
+
+
 @menu_app.get("/get_child_menu")
 def get_child_menu():
     parent_id = request.params.getunicode("parent_id")

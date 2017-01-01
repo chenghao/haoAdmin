@@ -5,3 +5,4 @@ jinja2
 bottle
 peewee
 pymysql
+webargs

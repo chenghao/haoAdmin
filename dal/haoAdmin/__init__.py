@@ -11,7 +11,7 @@ def get_menu(user_id=None, parent_id=None):
 
     menu = HMenu.select(
         HMenu.pid, HMenu.menu_name.alias("title"), HMenu.menu_url.alias("href"), HMenu.parent_menu,
-        HMenu.icon
+        HMenu.icon, HMenu.sort, HOrg.pid.alias("org_id"), HOrg.name.alias("org_name")
     ).join(
         HRoleMenu, on=(HMenu.pid == HRoleMenu.menu)
     ).join(
