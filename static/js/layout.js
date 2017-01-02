@@ -26,7 +26,7 @@ layui.config({
 			//获取设置的模块ID
 			var id = $this.find('a').data('module-id');
 			//这里的数据源只是演示时用的，实际需求可能通过远程读取（根据模块ID来获取对应模块的信息）
-			var url = remoteUrl + "get_child_menu?parent_id=" + id;
+			var url = remoteUrl + "menu/get_child_menu?parent_id=" + id;
 
 			/*switch(id) {
 				case 1:

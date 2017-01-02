@@ -9,7 +9,7 @@ from dogpile.cache import api
 menu_app = Bottle()
 
 
-@menu_app.get("/menu", apply=[view("./haoAdmin/menu/index")])
+@menu_app.get("/index", apply=[view("./haoAdmin/menu/index")])
 def index():
     return {}
 

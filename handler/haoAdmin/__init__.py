@@ -7,13 +7,9 @@ import util
 from util import singletons
 from dogpile.cache import api
 from dal import haoAdmin
-from handler.haoAdmin.login import login_app
-from handler.haoAdmin.menu import menu_app
 
 admin_app = Bottle()
 admin_app.install(JSONPlugin(json_dumps=lambda s: dumps(s, cls=util.ComplexEncoder)))
-admin_app.merge(login_app)
-admin_app.merge(menu_app)
 
 
 @admin_app.get("/", apply=[view("./haoAdmin/index")])

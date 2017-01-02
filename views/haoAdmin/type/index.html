@@ -6,19 +6,18 @@
 
 		<blockquote class="layui-elem-quote">
 			<a href="javascript:;" class="layui-btn layui-btn-small" id="add">
-				<i class="layui-icon">&#xe608;</i> 添加菜单
+				<i class="layui-icon">&#xe608;</i> 字典分类录入
 			</a>
 		</blockquote>
 
-		<fieldset class="layui-elem-field">
-			<legend>数据列表</legend>
+		<fieldset class="layui-elem-field" style="width: 55%; float: left">
+			<legend>字典分类列表</legend>
 			<div class="layui-field-box">
 				<table class="site-table table-hover">
 					<thead>
 						<tr>
-							<th>菜单名称</th>
-							<th>菜单顺序</th>
-							<th>菜单归属</th>
+							<th>字典名称</th>
+							<th>字典code</th>
 							<th>操作</th>
 						</tr>
 					</thead>
@@ -27,7 +26,43 @@
 
 					</tbody>
 
-					<script type="text/html" id="menu_tpl">
+					<script type="text/html" id="body_tpl">
+						{% raw %}
+							{{# layui.each(d.one_level_menu, function(index, item){ }}
+								<tr>
+									<td>{{ item.title }}</td>
+									<td>{{ item.sort }}</td>
+									<td>
+										<a href="javascript:;" class="layui-btn layui-btn-mini">编辑</a>
+										<a href="javascript:;" class="layui-btn layui-btn-danger layui-btn-mini">删除</a>
+										<a href="javascript:;" class="layui-btn layui-btn-normal layui-btn-mini">子菜单</a>
+									</td>
+								</tr>
+							{{# }) }}
+						{% endraw %}
+					</script>
+
+				</table>
+			</div>
+		</fieldset>
+
+		<fieldset class="layui-elem-field" style="width: 40%; float: right">
+			<legend>数据列表</legend>
+			<div class="layui-field-box">
+				<table class="site-table table-hover">
+					<thead>
+						<tr>
+							<th>类型名称</th>
+							<th>类型编码</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+
+					<tbody id="tbodys2">
+
+					</tbody>
+
+					<script type="text/html" id="body_tpl2">
 						{% raw %}
 							{{# layui.each(d.one_level_menu, function(index, item){ }}
 								<tr>

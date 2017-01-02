@@ -10,7 +10,7 @@
 			</header>
 
 			<div class="beg-login-main">
-				<form action="login" class="layui-form" method="post" id="commonForm">
+				<form action="#" class="layui-form" method="post" id="commonForm">
 					<div class="layui-form-item">
 						<label class="beg-login-icon"><i class="layui-icon">&#xe612;</i></label>
 						<input type="text" name="login_name" lay-verify="required" autocomplete="off" placeholder="这里输入登录名" class="layui-input">
@@ -36,7 +36,7 @@
 				</form>
 			</div>
 			<footer>
-				<p>ChengHao © github.com/chenghao</p>
+				<p>ChengHao © <a href="https://github.com/chenghao" target="_blank">github.com/chenghao</a></p>
 			</footer>
 		</div>
 
@@ -53,7 +53,7 @@
 					$("#commonForm").ajaxForm({
 						resetForm: true,
 						dataType: "json",
-						url: getPrefixPath("login"),
+						url: getPrefixPath("login/login"),
 						beforeSubmit: function () {
 							layer.load();
 						},

@@ -32,4 +32,4 @@ class LoginMiddleware(object):
     def is_user_login(self, environ):
         user_id = handler.get_user_id()
         if not user_id:
-            environ["PATH_INFO"] = conf.ADMIN_PREFIX + "/login"
+            environ["PATH_INFO"] = conf.ADMIN_PREFIX + "/login/login"

@@ -111,9 +111,9 @@
 
 			function logout(){
 				_confirm("确定退出吗？", function(){
-					ajaxReq("logout", function(data){
+					ajaxReq("login/logout", function(data){
 						if(data.code == 0){
-							customHref("login");
+							customHref("");
 						}
 					}, {}, "post");
 				});
