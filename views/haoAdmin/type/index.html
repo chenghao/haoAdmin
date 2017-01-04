@@ -8,6 +8,11 @@
 			<a href="javascript:;" class="layui-btn layui-btn-small" id="add">
 				<i class="layui-icon">&#xe608;</i> 字典分类录入
 			</a>
+
+			<div class="layui-input-inline" style="width: 400px; float: right;">
+			  	<input type="text" id="keyword" class="layui-input" style="width: 80%; float: left;" placeholder="根据字典名称/字典code搜索">
+				<button class="layui-btn" style="float: right;" onclick="_search()">搜索</button>
+			</div>
 		</blockquote>
 
 		<fieldset class="layui-elem-field" style="width: 55%; float: left">
@@ -28,14 +33,14 @@
 
 					<script type="text/html" id="body_tpl">
 						{% raw %}
-							{{# layui.each(d.one_level_menu, function(index, item){ }}
+							{{# layui.each(d, function(index, item){ }}
 								<tr>
-									<td>{{ item.title }}</td>
-									<td>{{ item.sort }}</td>
+									<td>{{ item.group_name }}</td>
+									<td>{{ item.group_value }}</td>
 									<td>
 										<a href="javascript:;" class="layui-btn layui-btn-mini">编辑</a>
 										<a href="javascript:;" class="layui-btn layui-btn-danger layui-btn-mini">删除</a>
-										<a href="javascript:;" class="layui-btn layui-btn-normal layui-btn-mini">子菜单</a>
+										<a href="javascript:;" class="layui-btn layui-btn-normal layui-btn-mini">查看类型</a>
 									</td>
 								</tr>
 							{{# }) }}
@@ -84,122 +89,56 @@
 		</fieldset>
 
 		<div class="admin-table-page">
-			<div id="page" class="page">
-			</div>
+			<div id="page" class="page tcdPageCode"></div>
 		</div>
 	</div>
 
 
 	<script>
+		var _keyword = "";
+
 		$(function(){
-			init_data();
+			init_data(1);
 		});
 
-		function init_data(){
-			ajaxReq("menu/get_parent_menu", function(data){
+		function init_data(page_no, keyword){
+			if(keyword){
+				_keyword = keyword;
+			}
+
+			ajaxReq("type/get_typegroup", function(data){
 				console.log(data)
 
 				layui.use(['laytpl'], function(){
 					var laytpl = layui.laytpl;
-					var tpl = document.getElementById('menu_tpl').innerHTML; //读取模版
+
+					var tpl = document.getElementById('body_tpl').innerHTML; //读取模版
 					//方式一：异步渲染（推荐）
-					laytpl(tpl).render(data, function(render){
+					laytpl(tpl).render(data.groups, function(render){
 					  document.getElementById('tbodys').innerHTML = render;
 					});
 				});
-			});
+
+				showPage(data.page_no, data.total_page);
+			}, {page_no: page_no, keyword: keyword});
 		}
 
-
-
-		/*layui.config({
-			base: 'plugins/layui/modules/'
-		});
-
-		layui.use(['icheck', 'laypage','layer'], function() {
-			var $ = layui.jquery,
-				laypage = layui.laypage,
-				layer = parent.layer === undefined ? layui.layer : parent.layer;
-			$('input').iCheck({
-				checkboxClass: 'icheckbox_flat-green'
-			});
-
-			//page
-			laypage({
-				cont: 'page',
-				pages: 25 //总页数
-					,
-				groups: 5 //连续显示分页数
-					,
-				jump: function(obj, first) {
-					//得到了当前页，用于向服务端请求对应数据
-					var curr = obj.curr;
-					if(!first) {
-						//layer.msg('第 '+ obj.curr +' 页');
+		function showPage(page_no, total_page){
+			if(total_page != 0){
+				$(".tcdPageCode").createPage({
+					pageCount:total_page,
+					current:page_no,
+					backFn:function(n){
+						init_data(n, _keyword);
 					}
-				}
-			});
+				});
+			}
+		}
 
-			$('#search').on('click', function() {
-				parent.layer.alert('你点击了搜索按钮')
-			});
+		function _search(){
+			var keyword = $("#keyword").val();
+			init_data(1, keyword);
+		}
 
-			$('#add').on('click', function() {
-				$.get('temp/edit-form.html', null, function(form) {
-					layer.open({
-						type: 1,
-						title: '添加表单',
-						content: form,
-						btn: ['保存', '取消'],
-						area: ['600px', '400px'],
-						maxmin: true,
-						yes: function(index) {
-							console.log(index);
-						},
-						full: function(elem) {
-							var win = window.top === window.self ? window : parent.window;
-							$(win).on('resize', function() {
-								var $this = $(this);
-								elem.width($this.width()).height($this.height()).css({
-									top: 0,
-									left: 0
-								});
-								elem.children('div.layui-layer-content').height($this.height() - 95);
-							});
-						}
-					});
-				});
-			});
-
-			$('#import').on('click', function() {
-				var that = this;
-				var index = layer.tips('只想提示地精准些', that,{tips: [1, 'white']});
-				$('#layui-layer'+index).children('div.layui-layer-content').css('color','#000000');
-			});
-
-			$('.site-table tbody tr').on('click', function(event) {
-				var $this = $(this);
-				var $input = $this.children('td').eq(0).find('input');
-				$input.on('ifChecked', function(e) {
-					$this.css('background-color', '#EEEEEE');
-				});
-				$input.on('ifUnchecked', function(e) {
-					$this.removeAttr('style');
-				});
-				$input.iCheck('toggle');
-			}).find('input').each(function() {
-				var $this = $(this);
-				$this.on('ifChecked', function(e) {
-					$this.parents('tr').css('background-color', '#EEEEEE');
-				});
-				$this.on('ifUnchecked', function(e) {
-					$this.parents('tr').removeAttr('style');
-				});
-			});
-			$('#selected-all').on('ifChanged', function(event) {
-				var $input = $('.site-table tbody tr td').find('input');
-				$input.iCheck(event.currentTarget.checked ? 'check' : 'uncheck');
-			});
-		});*/
 	</script>
 </body>
