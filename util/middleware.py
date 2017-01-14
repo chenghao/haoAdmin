@@ -2,7 +2,6 @@
 __author__ = "chenghao"
 
 import conf, handler
-from util import singletons
 
 
 class LoginMiddleware(object):
@@ -31,5 +30,5 @@ class LoginMiddleware(object):
 
     def is_user_login(self, environ):
         user_id = handler.get_user_id()
-        if not user_id:
+        if user_id is None:
             environ["PATH_INFO"] = conf.ADMIN_PREFIX + "/login/login"

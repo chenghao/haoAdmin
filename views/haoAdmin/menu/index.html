@@ -62,8 +62,6 @@
 
 		function init_data(){
 			ajaxReq("menu/get_parent_menu", function(data){
-				console.log(data)
-
 				layui.use(['laytpl'], function(){
 					var laytpl = layui.laytpl;
 					var tpl = document.getElementById('menu_tpl').innerHTML; //读取模版

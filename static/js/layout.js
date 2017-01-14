@@ -1,7 +1,7 @@
 layui.config({
 	base: '/static/js/'
 }).use(['element', 'layer', 'navbar', 'tab'], function() {
-	var element = layui.element()
+	var element = layui.element();
 	$ = layui.jquery,
 		layer = layui.layer,
 		navbar = layui.navbar(),
@@ -26,15 +26,7 @@ layui.config({
 			//获取设置的模块ID
 			var id = $this.find('a').data('module-id');
 			//这里的数据源只是演示时用的，实际需求可能通过远程读取（根据模块ID来获取对应模块的信息）
-			var url = remoteUrl + "menu/get_child_menu?parent_id=" + id;
-
-			/*switch(id) {
-				case 1:
-					url = ccc;
-					break;
-				default:
-					break;
-			}*/
+			var url = remoteUrl + "menu/get_child_menu?parent_id=" + id + "&t=" + (new Date()).valueOf();
 
 			//设置数据源有两个方式。
 			//第一：在此页面通过ajax读取设置  举个栗子：

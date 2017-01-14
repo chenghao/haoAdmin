@@ -3,7 +3,6 @@ __author__ = "chenghao"
 
 from bottle import request
 import conf
-from util import singletons
 
 
 def get_user_id():
@@ -11,11 +10,13 @@ def get_user_id():
     获取user_id
     :return:
     """
-    cookie_id = request.get_cookie(conf.ADMIN_COOKIE)
-    dogpile_session_f = singletons.get_session_file()
-    result = dogpile_session_f.get(cookie_id)
-    if result:
-        user_id = result.get("pid")
-    else:
-        user_id = None
+    user_id = None
+
+    env = request.environ
+    sess = env.get(conf.ADMIN_SESSION, None)
+    if sess:
+        user = sess.get(conf.CURRENT_USER, None)
+        if user:
+            user_id = user.get("pid", None)
+
     return user_id

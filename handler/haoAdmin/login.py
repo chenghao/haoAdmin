@@ -1,11 +1,9 @@
 # coding:utf-8
 __author__ = "chenghao"
 
-from bottle import Bottle, request, redirect, response, jinja2_view as view
-import handler, util, conf
+from bottle import Bottle, request, redirect, jinja2_view as view
+import conf, handler
 from dal.haoAdmin import user
-from dal import haoAdmin
-from util import singletons
 
 login_app = Bottle()
 
@@ -34,20 +32,9 @@ def login():
 
     result = user.login(login_name, login_pwd)
     if result:
-        # 获取一级菜单,并缓存
-        one_level_menu = haoAdmin.get_menu(result.get("pid"))
-        cache_m = singletons.get_cache_memory()
-        cache_m.set("one_level_menu", one_level_menu)
-
-        # 设置 cookie
-        cookie_id = util.random_num()
-        dogpile_session_f = singletons.get_session_file()
-        dogpile_session_f.set(cookie_id, result)
-
-        conf_ = singletons.Conf()
-        max_age = conf_.getint("cookie", "max_age")
-        path = conf_.get("cookie", "path")
-        response.set_cookie(conf.ADMIN_COOKIE, cookie_id, max_age=max_age, path=path)
+        # 设置 session
+        s = request.environ[conf.ADMIN_SESSION]
+        s[conf.CURRENT_USER] = result
 
         return {"code": 0}
     else:
@@ -56,8 +43,12 @@ def login():
 
 @login_app.post("/logout")
 def logout():
-    cookie_id = request.get_cookie(conf.ADMIN_COOKIE)
-    dogpile_session_f = singletons.get_session_file()
-    dogpile_session_f.delete(cookie_id)
-    response.set_cookie(conf.ADMIN_COOKIE, "")
+    sess = request.environ[conf.ADMIN_SESSION]
+    sess[conf.CURRENT_USER] = None
+
+    from util import singletons
+    cache = singletons.Cache()
+    ca = cache.get_cache(conf.cache_key, **conf.cache_opt)
+    ca.clear()
+
     return {"code": 0}

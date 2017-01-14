@@ -1,8 +1,7 @@
-meinheld
 gevent
-dogpile.cache
 jinja2
 bottle
 peewee
 pymysql
+beaker
 webargs

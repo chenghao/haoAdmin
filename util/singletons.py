@@ -4,6 +4,8 @@ __author__ = "chenghao"
 import ConfigParser, os, logging
 from logging import handlers
 from dogpile.cache import make_region
+from beaker.cache import CacheManager
+import conf
 
 path = "./conf.ini"
 
@@ -72,6 +74,29 @@ class Log(object):
     获取log实例
     """
     __metaclass__ = SingletonLog
+
+
+class SingletonCache(type):
+    """
+    缓存单例
+    """
+    def __init__(cls, name, bases, dict):
+        super(SingletonCache, cls).__init__(name, bases, dict)
+        cls._instances = None
+
+    def __call__(cls, *args, **kwargs):
+        if cls._instances is None:
+            super(SingletonCache, cls).__call__(*args, **kwargs)
+            cache = CacheManager(cache_regions=conf.cache_opts)
+            cls._instances = cache
+        return cls._instances
+
+
+class Cache(object):
+    """
+    获取缓存实例
+    """
+    __metaclass__ = SingletonCache
 
 
 class SingletonDogpile(type):

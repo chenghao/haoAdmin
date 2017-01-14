@@ -97,3 +97,7 @@ def total_page(total_rows, rows=conf.ROWS):
     将总行数计算出多少页
     """
     return int((total_rows - 1) / rows + 1)
+
+
+if __name__ == "__main__":
+    print get_md5_s("111111", "hao")
