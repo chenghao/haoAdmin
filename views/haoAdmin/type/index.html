@@ -89,7 +89,7 @@
 		</fieldset>
 
 		<div class="admin-table-page">
-			<div id="page" class="page tcdPageCode"></div>
+			<div id="page" class="page"></div>
 		</div>
 	</div>
 
@@ -102,41 +102,37 @@
 		});
 
 		function init_data(page_no, keyword){
-			if(keyword){
-				_keyword = keyword;
-			}
-
 			ajaxReq("type/get_typegroup", function(data){
-				console.log(data)
-
-				layui.use(['laytpl'], function(){
-					var laytpl = layui.laytpl;
-
-					var tpl = document.getElementById('body_tpl').innerHTML; //读取模版
-					//方式一：异步渲染（推荐）
-					laytpl(tpl).render(data.groups, function(render){
-					  document.getElementById('tbodys').innerHTML = render;
-					});
+				var laytpl = layui.laytpl;
+				var tpl = document.getElementById('body_tpl').innerHTML; //读取模版
+				//方式一：异步渲染（推荐）
+				laytpl(tpl).render(data.groups, function(render){
+				  document.getElementById('tbodys').innerHTML = render;
 				});
 
-				showPage(data.page_no, data.total_page);
+				buildPage(data.page_no, data.total_page);
 			}, {page_no: page_no, keyword: keyword});
 		}
 
-		function showPage(page_no, total_page){
-			if(total_page != 0){
-				$(".tcdPageCode").createPage({
-					pageCount:total_page,
-					current:page_no,
-					backFn:function(n){
-						init_data(n, _keyword);
+		function buildPage(page_no, total_page){
+			var laypage = layui.laypage;
+			laypage({
+				cont: 'page',
+				pages: total_page, //总页数
+				groups: 5, //连续显示分页数
+				curr: page_no, //当前页数
+				jump: function(obj, first) {
+					var curr = obj.curr;
+					if(!first) {
+						init_data(obj.curr, _keyword);
 					}
-				});
-			}
+				}
+			});
 		}
 
 		function _search(){
 			var keyword = $("#keyword").val();
+			_keyword = keyword;
 			init_data(1, keyword);
 		}
 

@@ -148,14 +148,7 @@ if __name__ == "__main__":
     print user
     print len(user)
     print [r for r in user.dicts()][0]
-    dogpile_cache = singletons.Dogpiles()[0]
-    dogpile_cache.set("login_user", user)
 
-    for u in user:
-        print u.login_name, u.user_name
-
-    user = dogpile_cache.get("login_user")
-    print user
     for u in user:
         print u.login_name, u.user_name
 
