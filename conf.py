@@ -11,7 +11,7 @@ CURRENT_USER = "current_user"  # 当前用户
 
 session_opts = {
     'session.type': 'file',  # 'memory',         # 以文件的方式保存session
-    'session.cookie_expires': 3000,              # session过期时间为300秒
+    'session.cookie_expires': 1800,              # session过期时间为300秒
     'session.cookie_path': ADMIN_PREFIX,         # session路径
     'session.data_dir': '/home/chenghao/cache',  # session保存目录
     'session.auto': True,                        # 自动保存session

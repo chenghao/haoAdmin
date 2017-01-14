@@ -1,7 +1,7 @@
 #coding:utf-8
 __author__ = "chenghao"
 
-from bottle import Bottle, request, redirect, response, jinja2_view as view
+from bottle import Bottle, request, jinja2_view as view
 from dal.haoAdmin import type
 import util
 

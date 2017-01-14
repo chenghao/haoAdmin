@@ -16,7 +16,7 @@ def login():
     """
     pid = handler.get_user_id()
     if pid:
-        redirect(handler.conf.ADMIN_PREFIX)
+        redirect(conf.ADMIN_PREFIX)
     else:
         return {}
 

@@ -1,7 +1,7 @@
 # coding:utf-8
 __author__ = "chenghao"
 
-from bottle import Bottle, static_file, request, JSONPlugin
+from bottle import Bottle, static_file, request, JSONPlugin, redirect
 from routes import Routes
 import conf, handler, util
 from beaker.middleware import SessionMiddleware
@@ -32,7 +32,7 @@ def login_hook():
     :return:
     """
     hook_path = _admin + "/*"
-    exclude_path = [_admin + "/login", _admin + "/logout"]
+    exclude_path = [_admin + "/login/login", _admin + "/login/logout"]
 
     path_info = request.environ.get("PATH_INFO")
     if path_info == _admin or (path_info in exclude_path) is False:
