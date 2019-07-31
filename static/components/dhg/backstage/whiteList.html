@@ -1,0 +1,194 @@
+<style>
+    .layui-badge-rim + .layui-badge-rim {
+        margin-left: 5px;
+    }
+</style>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table class="layui-table" id="whiteListTable" lay-filter="whiteListTable"></table>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="toolbarWhiteList">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="btnAdd">添加</button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="btnDels">删除</button>
+    </div>
+</script>
+
+<!-- 表单弹窗 -->
+<script type="text/html" id="whiteListForm">
+    <form lay-filter="userForm" class="layui-form model-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">IP</label>
+            <div class="layui-input-block">
+                <input name="ip" placeholder="请输入IP" type="text" class="layui-input"
+                       maxlength="15" lay-verify="required|ip" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <input name="remark" placeholder="请输入备注" type="text" class="layui-input" maxlength="50" />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">验证码</label>
+            <div class="layui-input-block">
+                <input name="authCode" placeholder="请输入验证码" type="text" class="layui-input"
+                       lay-verify="required|number" required/>
+            </div>
+        </div>
+
+        <div class="layui-form-item text-right">
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="formSubmit" lay-submit>保存</button>
+        </div>
+    </form>
+</script>
+
+<!-- 表单弹窗 -->
+<script type="text/html" id="delForm">
+    <form lay-filter="delForm" class="layui-form model-form">
+        <input name="ids" type="hidden">
+        <div class="layui-form-item">
+            <label class="layui-form-label">验证码</label>
+            <div class="layui-input-block">
+                <input name="authCode" placeholder="请输入验证码" type="text" class="layui-input"
+                       maxlength="6" lay-verify="required|number" required/>
+            </div>
+        </div>
+
+        <div class="layui-form-item text-right">
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="delFormSubmit" lay-submit>保存</button>
+        </div>
+    </form>
+</script>
+
+<script>
+    layui.use(['layer', 'form', 'table', 'admin', 'config'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var admin = layui.admin;
+        var config = layui.config;
+
+        form.render('select');
+
+        //自定义验证
+        form.verify({
+            //数组的两个值分别代表：[正则匹配、匹配不符时的提示文字]
+            ip: [
+                /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
+                ,'请输入正确的IP'
+            ]
+        });
+
+        // 渲染表格
+        table.render({
+            elem: '#whiteListTable',
+            toolbar: '#toolbarWhiteList',
+            defaultToolbar: ["filter"],
+            url: config.base_server + 'whiteList',
+            where: {
+                access_token: config.getToken()
+            },
+            page: true,
+            cellMinWidth: 100,
+            cols: [[
+                {type: 'checkbox', },
+                {field: 'id', title: '编号'},
+                {field: 'ip', title: 'IP'},
+                {field: 'remark', title: '备注'},
+                {field: 'operatorName', title: '操作人'}
+            ]]
+        });
+
+        //头工具栏事件
+        table.on('toolbar(whiteListTable)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch(obj.event){
+                case 'btnAdd':
+                    showEditModel();
+                    break;
+                case 'btnDels':
+                    var data = checkStatus.data;
+                    var ids = "";
+                    $.each(data, function (i, obj) {
+                        ids += ids == "" ? obj.id : "," + obj.id;
+                    });
+                    dels(ids);
+                    break;
+            };
+        });
+
+        // 显示表单弹窗
+        function showEditModel() {
+            admin.open({
+                type: 1,
+                area: '360px',
+                offset: '65px',
+                title: '添加IP白名单',
+                content: $('#whiteListForm').html(),
+                success: function (layero, index) {
+                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
+
+                    // 表单提交事件
+                    form.on('submit(formSubmit)', function (d) {
+                        layer.load();
+                        admin.req('whiteList', d.field, function (res) {
+                            layer.closeAll('loading');
+                            if (res.code == 200) {
+                                layer.msg(res.msg, {icon: 1});
+                                layer.closeAll('page');
+                                table.reload('whiteListTable');
+                            } else {
+                                layer.msg(res.msg, {icon: 2});
+                            }
+                        }, 'POST');
+                        return false;
+                    });
+                }
+            });
+        }
+
+        // 删除
+        function dels(ids) {
+            if(!ids) {
+                layer.msg("请先选择数据", {icon: 2}); return;
+            }
+
+            admin.open({
+                type: 1,
+                area: '360px',
+                offset: '65px',
+                title: '删除IP白名单',
+                content: $('#delForm').html(),
+                success: function (layero, index) {
+                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
+                    $("input[name='ids']").val(ids); //赋值
+                    // 表单提交事件
+                    form.on('submit(delFormSubmit)', function (d) {
+                        layer.load();
+                        admin.req('whiteList/dels', d.field, function (res) {
+                            layer.closeAll('loading');
+                            if (res.code == 200) {
+                                layer.msg(res.msg, {icon: 1});
+                                layer.closeAll('page');
+                                table.reload('whiteListTable');
+                            } else {
+                                layer.msg(res.msg, {icon: 2});
+                            }
+                        }, 'DELETE');
+                        return false;
+                    });
+                }
+            });
+        }
+
+    });
+</script>

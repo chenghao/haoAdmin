@@ -1,7 +1,6 @@
-gevent
-jinja2
 bottle
 peewee
 pymysql
-beaker
 webargs
+pyjwt
+redis

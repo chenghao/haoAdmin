@@ -1,179 +1,137 @@
 # coding:utf-8
-__author__ = "chenghao"
+__author__ = "gaunt"
 
-from peewee import Model, PrimaryKeyField, DateTimeField, CharField, ForeignKeyField, IntegerField, CompositeKey
+import conf
 from playhouse.pool import PooledMySQLDatabase
-from util import singletons
+from peewee import Model, AutoField, BigAutoField, CharField, IntegerField, DateTimeField, SQL
 
-conf = singletons.Conf()
 
-database = PooledMySQLDatabase(conf.get("mysql", "db"), max_connections=conf.getint("mysql", "max_connections"),
-                               stale_timeout=conf.getint("mysql", "stale_timeout"),
-                               user=conf.get("mysql", "user"), passwd=conf.get("mysql", "passwd"),
-                               host=conf.get("mysql", "host"), port=conf.getint("mysql", "port"))
+database = PooledMySQLDatabase(conf.mysql_db, **conf.mysql_conn_param)
+
+
+class UnknownField(object):
+    def __init__(self, *_, **__): pass
 
 
 class BaseModel(Model):
-    pid = PrimaryKeyField(unique=True)  # 主键
-    create_time = DateTimeField()  # 创建日期
-
     class Meta:
         database = database
 
 
-class HOrg(BaseModel):
-    """
-    机构表
-    """
-    description = CharField(null=True, max_length=100)  # 机构描述
-    name = CharField(max_length=50)  # 机构名称
-    parent_org = ForeignKeyField('self', null=True, related_name='children', db_column="parent_org")
+class SysAuthorities(BaseModel):
+    authority = CharField(primary_key=True)
+    authority_name = CharField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    parent_name = CharField(null=True)
+    sort = IntegerField(constraints=[SQL("DEFAULT 0")])
 
     class Meta:
-        db_table = 'h_org'
+        table_name = 'sys_authorities'
 
 
-class HRole(BaseModel):
-    """
-    角色表
-    """
-    role_code = CharField(max_length=20)  # 角色code
-    role_name = CharField(max_length=20)  # 角色名
+class SysConfig(BaseModel):
+    config_name = CharField()
+    config_value = CharField()
+    mark = CharField(null=True)
 
     class Meta:
-        db_table = 'h_role'
+        table_name = 'sys_config'
 
 
-class HUser(BaseModel):
-    """
-    用户表
-    """
-    login_name = CharField(max_length=20, unique=True)  # 登录名
-    login_pwd = CharField(max_length=64)  # 登录密码
-    phone = CharField(null=True, max_length=16)
-    qq = CharField(null=True, max_length=12)
-    sex = IntegerField(null=True)
-    user_name = CharField(max_length=20)  # 用户名
-    wx = CharField(null=True, max_length=20)
+class SysDictData(BaseModel):
+    del_state = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    name = CharField(null=True)
+    parent_id = IntegerField(null=True)
+    sort = IntegerField(null=True)
+    value = CharField(null=True)
 
     class Meta:
-        db_table = 'h_user'
+        table_name = 'sys_dict_data'
 
 
-class HMenu(BaseModel):
-    """
-    菜单表
-    """
-    level = IntegerField(null=True)
-    menu_name = CharField(max_length=50)
-    menu_url = CharField(null=True, max_length=500)
-    parent_menu = ForeignKeyField('self', null=True, related_name='children', db_column="parent_menu")
-    sort = IntegerField()
-    icon = CharField()
-
-    class Meta:
-        db_table = 'h_menu'
-
-
-class HTypegroup(BaseModel):
-    group_name = CharField(max_length=20)
-    group_value = CharField(max_length=20, unique=True)
+class SysMenu(BaseModel):
+    authority = CharField(null=True)
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    menu_icon = CharField(null=True)
+    menu_id = AutoField()
+    menu_name = CharField()
+    menu_url = CharField(null=True)
+    parent_id = IntegerField(constraints=[SQL("DEFAULT -1")])
+    sort_number = IntegerField(constraints=[SQL("DEFAULT 0")])
+    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
 
     class Meta:
-        db_table = 'h_typegroup'
+        table_name = 'sys_menu'
 
 
-class HType(BaseModel):
-    group = ForeignKeyField(HTypegroup, db_column='group_id')
-    type_name = CharField(max_length=20)
-    type_value = CharField(max_length=20)
-
-    class Meta:
-        db_table = 'h_type'
-
-
-class HRoleMenu(BaseModel):
-    """
-    角色和菜单关联关系表
-    """
-    menu = ForeignKeyField(HMenu, db_column='menu_id')
-    role = ForeignKeyField(HRole, db_column='role_id')
+class SysOperLog(BaseModel):
+    business_type = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    error_msg = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    id = BigAutoField()
+    method = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    oper_id = IntegerField(null=True)
+    oper_ip = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    oper_location = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    oper_param = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    oper_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+    oper_url = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    status = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    title = CharField(constraints=[SQL("DEFAULT ''")], null=True)
 
     class Meta:
-        db_table = 'h_role_menu'
-        primary_key = CompositeKey('menu', 'role')
+        table_name = 'sys_oper_log'
 
 
-class HRoleOrg(BaseModel):
-    """
-    角色和机构关联关系表
-    """
-    org = ForeignKeyField(HOrg, db_column='org_id')
-    role = ForeignKeyField(HRole, db_column='role_id')
-
-    class Meta:
-        db_table = 'h_role_org'
-        primary_key = CompositeKey('org', 'role')
-
-
-class HRoleUser(BaseModel):
-    """
-    角色和用户关联关系表
-    """
-    role = ForeignKeyField(HRole, db_column='role_id')
-    user = ForeignKeyField(HUser, db_column='user_id')
+class SysRole(BaseModel):
+    comments = CharField(null=True)
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    role_code = CharField(unique=True)
+    role_id = AutoField()
+    role_name = CharField()
+    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
 
     class Meta:
-        db_table = 'h_role_user'
-        primary_key = CompositeKey('user', 'role')
+        table_name = 'sys_role'
 
 
-class HUserOrg(BaseModel):
-    """
-    用户和机构关联关系表
-    """
-    org = ForeignKeyField(HOrg, db_column='org_id')
-    user = ForeignKeyField(HUser, db_column='user_id')
+class SysRoleAuthorities(BaseModel):
+    authority = CharField(index=True)
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+    role_id = IntegerField(index=True)
 
     class Meta:
-        db_table = 'h_user_org'
-        primary_key = CompositeKey('user', 'org')
+        table_name = 'sys_role_authorities'
+        indexes = (
+            (('role_id', 'authority'), True),
+        )
 
 
-if __name__ == "__main__":
-    from util import singletons
-    from playhouse import shortcuts
+class SysUser(BaseModel):
+    avatar = CharField(null=True)
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    department_id = IntegerField(null=True)
+    nick_name = CharField(null=True)
+    password = CharField()
+    phone = CharField(null=True)
+    sec_key = CharField(null=True)
+    sex = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    state = IntegerField(constraints=[SQL("DEFAULT 1")])
+    true_name = CharField(index=True, null=True)
+    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    user_id = AutoField()
+    username = CharField(unique=True)
 
-    user = HUser.select().where(HUser.pid == 1)
-    print user
-    print len(user)
-    print [r for r in user.dicts()][0]
+    class Meta:
+        table_name = 'sys_user'
 
-    for u in user:
-        print u.login_name, u.user_name
 
-    roleUser = HRoleUser.select().where(HRoleUser.user == 1)
-    print roleUser
-    print [shortcuts.model_to_dict(r) for r in roleUser]
-    for ru in roleUser:
-        user = ru.user
-        role = ru.role
-        print user.user_name, role.role_name, role.role_code
+class SysUserRole(BaseModel):
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    role_id = IntegerField(index=True)
+    user_id = IntegerField(index=True)
 
-    menu = HMenu.select(
-        HMenu.pid, HMenu.menu_name, HMenu.menu_url
-    ).join(
-        HRoleMenu, on=(HMenu.pid == HRoleMenu.menu)
-    ).join(
-        HRole, on=(HRoleMenu.role == HRole.pid)
-    ).join(
-        HRoleUser, on=(HRole.pid == HRoleUser.role)
-    ).join(
-        HUser, on=(HRoleUser.user == HUser.pid)
-    ).join(
-        HUserOrg, on=(HUser.pid == HUserOrg.user)
-    ).join(
-        HOrg, on=(HUserOrg.org == HOrg.pid)
-    ).where(HMenu.parent_menu == None, HRoleUser.user == 1).order_by(HMenu.sort)
-    print menu
-    print [r for r in menu.dicts()]
+    class Meta:
+        table_name = 'sys_user_role'
+        indexes = (
+            (('user_id', 'role_id'), True),
+        )

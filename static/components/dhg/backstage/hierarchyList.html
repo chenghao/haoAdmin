@@ -1,0 +1,329 @@
+<style>
+    .layui-badge-rim + .layui-badge-rim {
+        margin-left: 5px;
+    }
+    .label-inline{
+        width: 120px;
+    }
+    .label-inline2{
+        width: 90px;
+        float: left;
+        text-align: center;
+        line-height: 40px;
+        font-size: 20px;
+    }
+</style>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table class="layui-table" id="hierarchyListTable" lay-filter="hierarchyListTable"></table>
+        </div>
+    </div>
+</div>
+
+
+<!-- 表格头操作 -->
+<script type="text/html" id="toolbarHierarchyList">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="btnAdd">添加</button>
+    </div>
+</script>
+
+<!-- 表格操作列 -->
+<script type="text/html" id="hierarchyTableBar">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    <a class="layui-btn layui-btn-xs" lay-event="hierarchy">分层</a>
+    <a class="layui-btn layui-btn-xs" lay-event="whitelist">白名单</a>
+</script>
+
+
+<!-- 表单弹窗 -->
+<script type="text/html" id="hierarchyForm">
+    <form lay-filter="hierarchyForm" class="layui-form model-form">
+        <input name="id" type="hidden"/>
+        <div class="layui-form-item" style="padding-left: 40px;">
+            <label class="layui-form-label">层级数</label>
+            <div class="layui-input-inline">
+                <input name="seriesNum" type="text" class="layui-input" maxlength="5" lay-verify="required|number"
+                       required />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label label-inline">层级名称</label>
+            <div class="layui-input-inline">
+                <input name="seriesName" class="layui-input" lay-verify="required" required>
+            </div>
+
+            <label class="layui-form-label" style="width: 60px;">层级描述</label>
+            <div class="layui-input-inline">
+                <input name="seriesDescribe" class="layui-input" >
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label label-inline">总付费（元）</label>
+            <div class="layui-input-inline">
+                <input name="totalPayDown" type="text" class="layui-input" lay-verify="required|number" required/>
+            </div>
+
+            <label class="label-inline2">~</label>
+            <div class="layui-input-inline">
+                <input name="totalPayUp" type="text" class="layui-input" lay-verify="" />
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label label-inline">总付费次数（次）</label>
+            <div class="layui-input-inline">
+                <input name="payNumDown" type="text" class="layui-input" lay-verify="required|number" required/>
+            </div>
+
+            <label class="label-inline2">~</label>
+            <div class="layui-input-inline">
+                <input name="payNumUp" type="text" class="layui-input" lay-verify="" />
+            </div>
+        </div>
+
+        <div class="layui-form-item text-right">
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="formSubmit" lay-submit>保存</button>
+        </div>
+    </form>
+</script>
+
+<!-- 表单弹窗 -->
+<script type="text/html" id="hierarchyScript">
+    <div style="height: 450px;overflow-y: auto">
+        <table class="layui-table" id="hierarchyTable" lay-filter="hierarchyTable"></table>
+    </div>
+
+    <div class="layui-form-item text-right" style="padding-right: 20px;">
+        <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        <button class="layui-btn" lay-filter="tableSubmit" lay-submit>执行分层</button>
+    </div>
+</script>
+
+<!-- 表单弹窗 -->
+<script type="text/html" id="whitelistScript">
+    <div class="layui-layer-wrap" style="padding-top: 10px">
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label" style="margin-top: 30px">当前白名单</label>
+            <div class="layui-input-block">
+                <textarea id="showWhiteListInAdd" class="layui-textarea" readonly="readonly"
+                          style="width: 95%;height: 100px;overflow: auto" placeholder="该层级白名单为空"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">当前层名称</label>
+            <div class="layui-input-block" style="width: 560px;">
+                <input type="text" id="seriesName" class="layui-input" readonly="readonly">
+            </div>
+            <input type="text" id="seriesNum" class="layui-input" style="display: none">
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label" style="margin-top: 130px">用户白名单</label>
+            <div class="layui-input-block">
+                <textarea id="rids" class="layui-textarea" style="width: 95%;height: 200px"
+                          placeholder="请输入白名单，格式为各rid之间以英文逗号隔开，中间不留空格！"
+                          onkeyup="this.value=this.value.replace(/[^\d,]/g,'')"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item text-right" style="padding-right: 20px;">
+        <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        <button class="layui-btn" lay-filter="addWhitelistSubmit" lay-submit>添加白名单</button>
+        <button class="layui-btn layui-btn-danger" lay-filter="delWhitelistSubmit" lay-submit>删除白名单</button>
+    </div>
+</script>
+
+
+<script>
+    layui.use(['layer', 'form', 'table', 'util', 'formSelects', 'admin', 'config', 'laydate'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var formSelects = layui.formSelects;
+        var admin = layui.admin;
+        var config = layui.config;
+        var laydate = layui.laydate;
+
+
+        // 渲染表格
+        table.render({
+            elem: '#hierarchyListTable',
+            toolbar: '#toolbarHierarchyList',
+            defaultToolbar: ["filter"],
+            url: config.base_server + 'userHierarchy',
+            where: {
+                access_token: config.getToken()
+            },
+            page: true,
+            cellMinWidth: 100,
+            cols: [[
+                {field: 'seriesNum', title: '层级数', fixed: 'left', width: 80},
+                {field: 'seriesName', title: '层级名称'},
+                {field: 'seriesDescribe', title: '层级描述'},
+                {field: 'totalPayDown', title: '总付费下限'},
+                {field: 'totalPayUp', title: '总付费上限'},
+                {field: 'payNumDown', title: '支付次数下限'},
+                {field: 'payNumUp', title: '支付次数上限'},
+                {fixed: 'right', align: 'center', toolbar: '#hierarchyTableBar', title: '操作', unresize: true, width: 220}
+            ]]
+        });
+
+        //头工具栏事件
+        table.on('toolbar(hierarchyListTable)', function(obj){
+            switch(obj.event){
+                case 'btnAdd':
+                    showEditModel();
+                    break;
+            };
+        });
+        // 工具条点击事件
+        table.on('tool(hierarchyListTable)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+
+            if (layEvent === 'del') { // 删除
+                del(obj);
+            } else if (layEvent === 'edit') { // 修改
+                showEditModel(data);
+            } else if(layEvent === 'hierarchy'){ //分层
+                if(data.seriesNum == 0 || data.seriesNum == 1){
+                    error("不允许对" + data.seriesNum + "层玩家进行分层操作");
+                }else{
+                    showHierarchy(data.id);
+                }
+            } else if(layEvent === 'whitelist'){ //白名单
+                showWhitelist(data.seriesNum, data.seriesName, data.id);
+            }
+        });
+
+        // 显示表单弹窗
+        function showEditModel(data) {
+            var title = data ? '修改用户层级配置' : '添加用户层级配置';
+            openWindow(admin, "700px", title, "hierarchyForm", function () {
+                // 回显user数据
+                if (data) {
+                    form.val('hierarchyForm', data);
+                }
+
+                //编辑时层级数只读
+                if(data){
+                    $("input[name='seriesNum']").attr("readonly", "readonly");
+                }else{
+                    $("input[name='seriesNum']").removeAttr("readonly");
+                }
+
+                // 表单提交事件
+                form.on('submit(formSubmit)', function (d) {
+                    var method = data ? 'PUT' : 'POST';
+                    _req('userHierarchy', d.field, admin, function (res) {
+                        layer.closeAll('page');
+                        table.reload('hierarchyListTable');
+                    }, method);
+                    return false;
+                });
+            }, $);
+        }
+
+        // 删除
+        function del(obj) {
+            confirmDel('userHierarchy/' + obj.data.id, {}, admin, function (data) {
+                obj.del();
+            });
+        }
+
+        // 显示分层
+        function showHierarchy(sourceId) {
+            openWindow(admin, "700px", "选择从哪层拉取玩家", "hierarchyScript", function () {
+                // 渲染表格
+                table.render({
+                    elem: '#hierarchyTable',
+                    url: config.base_server + 'userHierarchy/getAllUserHierarchy',
+                    where: {
+                        access_token: config.getToken(),
+                        gtSeriesNum: 0
+                    },
+                    page: false,
+                    cellMinWidth: 100,
+                    cols: [[
+                        {type: 'radio' },
+                        {field: 'seriesNum', title: '层级数', width: 80},
+                        {field: 'seriesName', title: '层级名称'},
+                        {field: 'seriesDescribe', title: '层级描述', width: 300},
+                    ]]
+                });
+
+                //执行分层
+                var id = "";
+                table.on('radio(hierarchyTable)', function(obj){
+                    id = obj.data.id;
+                });
+                form.on('submit(tableSubmit)', function (d) {
+                    if(id){
+                        if(id == sourceId){
+                            error("不能选择当前的层级"); return;
+                        }
+
+                        var title = "确定要开始进行分层操作么？执行分层操作会花费服务器较长时间！";
+                        var param = {targetId: id, sourceId: sourceId};
+                        _confirm(title, "userHierarchy/hierarchy", param, admin, function (data) {
+                            layer.closeAll('page');
+                        }, "POST");
+                    }else{
+                        error("请先选择某一层级");
+                    }
+                });
+            }, $);
+        }
+        
+        // 显示白名单
+        function showWhitelist(seriesNum, seriesName, id) {
+            openWindow(admin, "700px", "白名单操作", "whitelistScript", function () {
+                $("#seriesNum").val(seriesNum);
+                $("#seriesName").val(seriesName);
+
+                //获取白名单
+                reqGet("userHierarchyPlayer/getWhitelistHierarchy", {hierarchyId: id}, admin, function (data) {
+                    var list = data.list;
+                    var rids = "";
+                    for(var i in list){
+                        var obj = list[i];
+                        rids += rids == "" ? obj.rid : "," + obj.rid;
+                    }
+                    $("#showWhiteListInAdd").val(rids);
+                }, true);
+
+                //添加白名单
+                form.on('submit(addWhitelistSubmit)', function (d) {
+                    var rids = $("#rids").val();
+                    if(rids){
+                        var title = "确定给层级" + seriesNum + "新增白名单吗？";
+                        var url = "userHierarchy/addWhitelist";
+                        confirmAdd(title, url, {seriesNum: seriesNum, rids: rids}, admin, function (data) {
+                            layer.closeAll('page');
+                        });
+                    }
+                });
+
+                //删除白名单
+                form.on('submit(delWhitelistSubmit)', function (d) {
+                    var rids = $("#rids").val();
+                    if(rids){
+                        var title = "确定给层级" + seriesNum + "删除白名单吗？";
+                        var url = "userHierarchy/delWhitelist";
+                        confirmDel(title, url, {seriesNum: seriesNum, rids: rids}, admin, function (data) {
+                            layer.closeAll('page');
+                        });
+                    }
+                });
+            }, $);
+        }
+        
+    });
+
+</script>

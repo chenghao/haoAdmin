@@ -1,0 +1,295 @@
+<style>
+    .layui-badge-rim + .layui-badge-rim {
+        margin-left: 5px;
+    }
+</style>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table class="layui-table" id="emailListTable" lay-filter="emailListTable"></table>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="toolbarEmailList">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="btnAdd">添加</button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="btnDels">删除</button>
+    </div>
+</script>
+
+<!-- 表单弹窗 -->
+<script type="text/html" id="emailListForm">
+    <form lay-filter="emailListForm" class="layui-form model-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮件标题</label>
+            <div class="layui-input-block">
+                <input name="mailTitle" placeholder="请输入邮件标题" type="text" class="layui-input"
+                       maxlength="100" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮件内容</label>
+            <div class="layui-input-block">
+                <textarea name="mailContent" style="height: 50px" class="layui-input"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">发送时间</label>
+            <div class="layui-input-block">
+                <input name="sendTime" id="sendTime" readonly="readonly" type="text" class="layui-input"
+                       lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">过期时间</label>
+            <div class="layui-input-block">
+                <input name="expireTime" id="expireTime" readonly="readonly" type="text" class="layui-input"
+                       lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮件类型</label>
+            <div class="layui-input-block">
+                <select name="mailType" lay-verify="required"></select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">发送类型</label>
+            <div class="layui-input-block">
+                <select name="sendType" lay-verify="required"></select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">指定玩家ID</label>
+            <div class="layui-input-block">
+                <textarea name="rids" style="height: 50px" class="layui-input"
+                          placeholder="请输入玩家ID，多个以英文逗号分隔"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">附件列表</label>
+            <div class="layui-input-block">
+                <textarea name="mailAnnexList" style="height: 50px" class="layui-input"
+                          placeholder="输入格式：物品ID,数量;物品ID,数量"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">发送原因</label>
+            <div class="layui-input-block">
+                <textarea name="sendReason" style="height: 50px" class="layui-input"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">验证码</label>
+            <div class="layui-input-block">
+                <input name="authCode" type="text" class="layui-input" lay-verify="required|number" required/>
+            </div>
+        </div>
+
+        <div class="layui-form-item text-right">
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="formSubmit" lay-submit>保存</button>
+        </div>
+    </form>
+</script>
+
+<!-- 表单弹窗 -->
+<script type="text/html" id="delForm">
+    <form lay-filter="delForm" class="layui-form model-form">
+        <input name="ids" type="hidden">
+        <div class="layui-form-item">
+            <label class="layui-form-label">验证码</label>
+            <div class="layui-input-block">
+                <input name="authCode" placeholder="请输入验证码" type="text" class="layui-input"
+                       maxlength="6" lay-verify="required|number" required/>
+            </div>
+        </div>
+
+        <div class="layui-form-item text-right">
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+            <button class="layui-btn" lay-filter="delFormSubmit" lay-submit>保存</button>
+        </div>
+    </form>
+</script>
+
+<script>
+    layui.use(['layer', 'form', 'table', 'util', 'formSelects', 'admin', 'config', 'laydate'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var formSelects = layui.formSelects;
+        var admin = layui.admin;
+        var config = layui.config;
+        var laydate = layui.laydate;
+
+        form.render('select');
+
+        //自定义验证
+        form.verify({
+            //数组的两个值分别代表：[正则匹配、匹配不符时的提示文字]
+            ip: [
+                /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
+                ,'请输入正确的IP'
+            ]
+        });
+
+        // 渲染表格
+        table.render({
+            elem: '#emailListTable',
+            toolbar: '#toolbarEmailList',
+            defaultToolbar: ["filter"],
+            url: config.base_server + 'emailList',
+            where: {
+                access_token: config.getToken()
+            },
+            page: true,
+            cellMinWidth: 100,
+            cols: [[ //邮件标题	邮件正文	玩家ID集合	过期时间	发送时间	发送原因	附件列表	邮件类型	sendType
+                {type: 'checkbox', },
+                {field: 'ip', title: '邮件标题'},
+                {field: 'remark', title: '邮件正文'},
+                {field: 'operatorName', title: '玩家ID集合'},
+                {field: 'operatorName', title: '发送时间'},
+                {field: 'operatorName', title: '过期时间'},
+                {field: 'operatorName', title: '发送原因'},
+                {field: 'operatorName', title: '附件列表'},
+                {field: 'operatorName', title: '邮件类型'},
+                {field: 'operatorName', title: '发送类型'}
+            ]]
+        });
+
+        //头工具栏事件
+        table.on('toolbar(emailListTable)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch(obj.event){
+                case 'btnAdd':
+                    showEditModel();
+                    break;
+                case 'btnDels':
+                    var data = checkStatus.data;
+                    var ids = "";
+                    $.each(data, function (i, obj) {
+                        ids += ids == "" ? obj.id : "," + obj.id;
+                    });
+                    dels(ids);
+                    break;
+            };
+        });
+
+        // 显示表单弹窗
+        function showEditModel() {
+            admin.open({
+                type: 1,
+                area: '450px',
+                offset: '65px',
+                title: '添加IP白名单',
+                content: $('#emailListForm').html(),
+                success: function (layero, index) {
+                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
+
+                    // 渲染邮件类型下拉框
+                    var types = store.get('dict').mailType;
+                    $('select[name="mailType"]').html('');
+                    for (var i in types) {
+                        $('select[name="mailType"]').append('<option value="' + i + '">' + types[i] + '</option>');
+                    }
+                    // 渲染邮件发送类型下拉框
+                    var types = store.get('dict').mailSendType;
+                    $('select[name="sendType"]').html('');
+                    for (var i in types) {
+                        $('select[name="sendType"]').append('<option value="' + i + '">' + types[i] + '</option>');
+                    }
+
+                    // 渲染日期
+                    renderDate();
+
+                    form.val('emailListForm', null);
+                    // 表单提交事件
+                    form.on('submit(formSubmit)', function (d) {
+                        layer.load();
+                        admin.req('emailList', d.field, function (res) {
+                            layer.closeAll('loading');
+                            if (res.code == 200) {
+                                layer.msg(res.msg, {icon: 1});
+                                layer.closeAll('page');
+                                table.reload('emailListTable');
+                            } else {
+                                layer.msg(res.msg, {icon: 2});
+                            }
+                        }, 'POST');
+                        return false;
+                    });
+                }
+            });
+        }
+
+        // 删除
+        function dels(ids) {
+            if(!ids) {
+                layer.msg("请先选择数据", {icon: 2}); return;
+            }
+
+            admin.open({
+                type: 1,
+                area: '360px',
+                offset: '65px',
+                title: '删除IP白名单',
+                content: $('#delForm').html(),
+                success: function (layero, index) {
+                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
+                    $("input[name='ids']").val(ids); //赋值
+                    // 表单提交事件
+                    form.on('submit(delFormSubmit)', function (d) {
+                        layer.load();
+                        admin.req('whiteList/dels', d.field, function (res) {
+                            layer.closeAll('loading');
+                            if (res.code == 200) {
+                                layer.msg(res.msg, {icon: 1});
+                                layer.closeAll('page');
+                                table.reload('whiteListTable');
+                            } else {
+                                layer.msg(res.msg, {icon: 2});
+                            }
+                        }, 'DELETE');
+                        return false;
+                    });
+                }
+            });
+        }
+
+        //生成日期
+        function renderDate() {
+            laydate.render({
+                elem: '#sendTime' ,type: 'datetime'
+                ,min: 0 //,max: 1, value: new Date()
+                ,done:function (value) {
+                    var expireTime = $("#expireTime").val();
+                    if(expireTime){
+                        if(value > expireTime){
+                            layer.msg("发送日期不能大于过期日期", {icon: 2});
+                        }
+                    }
+                }
+                ,btns: ['clear', 'now', 'confirm']
+                ,format:'yyyy-MM-dd HH:mm'
+            });
+            laydate.render({
+                elem: '#expireTime' ,type: 'datetime'
+                ,min: 0 //, max: 1, value: new Date()
+                ,done:function (value) {
+                    var sendTime = $("#sendTime").val();
+                    if(sendTime){
+                        if(value < sendTime){
+                            layer.msg("过期日期不能小于发送日期", {icon: 2});
+                        }
+                    }
+                }
+                ,btns: ['clear', 'now', 'confirm']
+                ,format:'yyyy-MM-dd HH:mm'
+            });
+        }
+    });
+
+</script>

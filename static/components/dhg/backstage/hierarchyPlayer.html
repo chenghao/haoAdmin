@@ -1,0 +1,117 @@
+<style>
+    .layui-badge-rim + .layui-badge-rim {
+        margin-left: 5px;
+    }
+</style>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <div class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <form class="layui-form">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: auto">层级名称</label>
+                            <div class="layui-input-inline" style="width: 150px">
+                                <select id="hierarchyId">
+
+                                </select>
+                            </div>
+                            <label class="layui-form-label" style="width: auto">查询玩家</label>
+                            <div class="layui-input-inline" style="width: 150px">
+                                <input type="text" id="rid" placeholder="请输入查询rid" class="layui-input">
+                            </div>
+
+                            <div class="layui-btn" id="playerBtnSearch">搜索</div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <table class="layui-table" id="hierarchyPlayerTable" lay-filter="hierarchyPlayerTable"></table>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/html" id="toolbarHierarchyPlayer">
+    <div class="layui-btn-container">
+
+    </div>
+</script>
+
+<script>
+    layui.use(['layer', 'form', 'table', 'util', 'formSelects', 'admin', 'config', 'laydate'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var formSelects = layui.formSelects;
+        var admin = layui.admin;
+        var config = layui.config;
+        var laydate = layui.laydate;
+        var util = layui.util;
+
+        //获取所有层级
+        $.getJSON(config.base_server + "userHierarchy/getAllUserHierarchy", {access_token: config.getToken()},
+            function (data) {
+                var options = '<option value="">所有层级</option>';
+                var list = data.list;
+                for(var i in list){
+                    var obj = list[i];
+                    options += '<option value="'+obj.id+'">'+obj.seriesName+'</option>';
+                }
+                $("#hierarchyId").html(options);
+
+                form.render('select');
+            }
+        );
+
+        // 渲染表格
+        table.render({
+            elem: '#hierarchyPlayerTable',
+            toolbar: '#toolbarHierarchyPlayer',
+            defaultToolbar: ["filter"],
+            url: config.base_server + 'userHierarchyPlayer',
+            where: {
+                access_token: config.getToken()
+            },
+            page: true,
+            cellMinWidth: 100,
+            cols: [[
+                {field: 'rid', title: 'RID', fixed: 'left'},
+                {field: 'nick', title: '角色名称'},
+                {field: 'hierarchyName', title: '层级名称'},
+                {
+                    templet: function (d) {
+                        return util.toDateString(d.regDate);
+                    }, title: '注册时间'
+                },
+                {
+                    templet: function (d) {
+                        return util.toDateString(d.lastLoginDate);
+                    }, title: '最后登录时间'
+                },
+                {field: 'chargeMoney', title: '充值总额'},
+                {field: 'chargeCount', title: '充值次数'},
+                {field: 'maxMoney', title: '单次最大充值'},
+                {field: 'txMoney', title: '提款总额'},
+                {field: 'txCount', title: '提款次数'}
+            ]]
+        });
+
+        // 搜索按钮点击事件
+        $('#playerBtnSearch').click(function () {
+            var rid = $('#rid').val();
+            var hierarchyId = $('#hierarchyId').val();
+            table.reload('hierarchyPlayerTable', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: {
+                    rid: rid, hierarchyId: hierarchyId
+                }
+            });
+        });
+    });
+
+</script>

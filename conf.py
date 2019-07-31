@@ -1,30 +1,48 @@
 # coding:utf-8
-__author__ = "chenghao"
+__author__ = "gaunt"
 
-ROWS = 1  # 每页显示条数
-STATIC_PREFIX = "./"  # 静态文件访问前缀
-ADMIN_PREFIX = "/admin"  # 后台访问前缀
-UEDITOR_PREFIX = ADMIN_PREFIX + "/ueditor"  # 后台福文本访问前缀
-
-ADMIN_SESSION = "beaker.session"  # session KEY
-CURRENT_USER = "current_user"  # 当前用户
-
-session_opts = {
-    'session.type': 'file',  # 'memory',         # 以文件的方式保存session
-    'session.cookie_expires': 1800,              # session过期时间为300秒
-    'session.cookie_path': ADMIN_PREFIX,         # session路径
-    'session.data_dir': '/home/chenghao/cache',  # session保存目录
-    'session.auto': True,                        # 自动保存session
+# mysql配置
+mysql_db = "bottle"
+mysql_conn_param = {
+    "user": "root",
+    "passwd": "123456",
+    "host": "192.168.0.122",
+    "port": 3306,
+    "max_connections": 1000,
+    "stale_timeout": 600
 }
 
-cache_key = "short_term"
-cache_opts = {
-    cache_key: {
-        'expire': 300,
-        'type': 'memory'
-    }
+# redis配置
+redis_conn_param = {
+    "host": "192.168.0.122",
+    "port": 6379,
+    "password": "lym123..",
+    "db": 5,
+    "max_connections": 1000
 }
-cache_opt = {
-    "expire": 300,
-    'type': 'memory'
+
+# log配置
+log = {
+    "log_file_path": "/home/logs/bottle",
+    "log_format": "%(asctime)s %(pathname)-5s %(funcName)-5s %(lineno)-5s %(levelname)-5s %(message)s",
+    "log_level": "DEBUG",
+    "log_when": "D",
+    "log_interval": 1
 }
+
+# jwt
+jwt_key = "gaunt"
+jwt_algorithm = "HS256"
+jwt_exp = 60 * 30
+
+# 请求拦截
+intercept_path = ["/sys/*"]
+exclude_path = ["/login/*", "/assets/*", "/components/*", "/login.html", "/index.html"]
+
+# redis key前缀
+prefix_token = "prefix:token"
+prefix_permit = "prefix:permit"
+prefix_role = "prefix:role"
+
+# 项目请求前缀
+prefix = "/v1"
