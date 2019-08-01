@@ -194,6 +194,18 @@ function openWindow(admin, area, title, id, callback, jq) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
+function jqueryAjaxGET(jquery, url, param, callback, notLoad, hideSuccessMsg) {
+    jqueryAjax(jquery, url, param, callback, "GET", notLoad, hideSuccessMsg)
+}
+function jqueryAjaxPOST(jquery, url, param, callback, notLoad, hideSuccessMsg) {
+    jqueryAjax(jquery, url, param, callback, "POST", notLoad, hideSuccessMsg)
+}
+function jqueryAjaxPUT(jquery, url, param, callback, notLoad, hideSuccessMsg) {
+    jqueryAjax(jquery, url, param, callback, "PUT", notLoad, hideSuccessMsg)
+}
+function jqueryAjaxDELETE(jquery, url, param, callback, notLoad, hideSuccessMsg) {
+    jqueryAjax(jquery, url, param, callback, "DELETE", notLoad, hideSuccessMsg)
+}
 
 function jqueryAjax(jquery, url, param, callback, method, notLoad, hideSuccessMsg) {
     if(!notLoad){ // 为true时就不显示等待框
@@ -201,11 +213,17 @@ function jqueryAjax(jquery, url, param, callback, method, notLoad, hideSuccessMs
     }
 
     jquery.ajax({
-        url: url,
+        url: layui.config.base_server + url,
         type: method ? method : "get",
         data: param ? param : {},
         dataType: "json",
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('Authorization', 'JWT ' + layui.config.getToken());
+        },
         success: function (data) {
+            console.log(url);
+            console.log(data);
+            console.log("==================")
             if(data.code == 200){
                 if(!hideSuccessMsg) success(data.msg);
 

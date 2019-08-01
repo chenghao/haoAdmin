@@ -24,12 +24,14 @@ layui.config({
     }
 
     // 获取用户信息
-    _req("sys/user/info", {}, admin, function (data) {
+    jqueryAjaxGET($, "sys/user/info", {}, function (data) {
+        admin.removeLoading();  // 移除页面加载动画
+
         $('#huName').text(data.data.nick_name);
-    }, "GET", true, true);
+    }, true, true);
 
     // 加载侧边栏
-    _req("sys/menu/user_menu", {}, admin, function (data) {
+    jqueryAjaxGET($, "sys/menu/user_menu", {}, function (data) {
         laytpl(sideNav.innerHTML).render(data.data, function (html) {
             $('.layui-layout-admin .layui-side .layui-nav').html(html);
             element.render('nav');
@@ -39,6 +41,6 @@ layui.config({
             url: '#/welcome',
             name: '<i class="layui-icon layui-icon-home"></i>'
         });
-    }, "GET", true, true);
+    }, true, true);
 
 });

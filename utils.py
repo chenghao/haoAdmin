@@ -236,6 +236,9 @@ class RedisUtil(object):
     def get(self, key):
         return redis_conn.get(key)
 
+    def deltele(self, key):
+        redis_conn.delete(key)
+
     def hset(self, name, key, value):
         redis_conn.hset(name, key, value)
 

@@ -15,3 +15,8 @@ def login(username, password):
 def get(user_id):
     user = SysUser.get(SysUser.user_id == user_id)
     return user
+
+
+def update_pwd(user_id, new_psw):
+    rowid = SysUser.update(password=new_psw).where(SysUser.user_id == user_id).execute()
+    return rowid

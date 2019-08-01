@@ -75,17 +75,17 @@ def after_request():
     """
     status_code = response.status_code
     if status_code == ResultEnum.error400.value["code"]:
-        raise HTTPError(400)
+        raise HTTPError(400, ResultEnum.error400.value["msg"])
     elif status_code == ResultEnum.error401.value["code"]:
-        raise HTTPError(401)
+        raise HTTPError(401, ResultEnum.error401.value["msg"])
     elif status_code == ResultEnum.error404.value["code"]:
-        raise HTTPError(404)
+        raise HTTPError(404, ResultEnum.error404.value["msg"])
     elif status_code == ResultEnum.error405.value["code"]:
-        raise HTTPError(405)
+        raise HTTPError(405, ResultEnum.error405.value["msg"])
     elif status_code == ResultEnum.error422.value["code"]:
-        raise HTTPError(422)
+        raise HTTPError(422, ResultEnum.error422.value["msg"])
     elif status_code == ResultEnum.error.value["code"]:
-        raise HTTPError(500)
+        raise HTTPError(500, ResultEnum.error500.value["msg"])
 
 
 #####################################################################################
