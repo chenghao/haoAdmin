@@ -85,7 +85,7 @@ def add_menu(parent_id, menu_name, menu_url, menu_icon, sort_number, authority):
     :param authority:
     :return:
     """
-    menu_name = request.params.getunicode("menu_name")
+    menu_name = utils.encode_utf8(menu_name)
     res = SysMenuService.add_menu(parent_id, menu_name, menu_url, menu_icon, sort_number, authority)
     if res:
         return error_result(msg=res)
@@ -118,7 +118,7 @@ def up_menu(menu_id, parent_id, menu_name, menu_url, menu_icon, sort_number, aut
     :param authority:
     :return:
     """
-    menu_name = request.params.getunicode("menu_name")
+    menu_name = utils.encode_utf8(menu_name)
     res = SysMenuService.up_menu(menu_id, parent_id, menu_name, menu_url, menu_icon, sort_number, authority)
     if res:
         return error_result(msg=res)

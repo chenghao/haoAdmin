@@ -28,6 +28,16 @@ def md5_salt(pwd, salt=""):
     md5_obj.update((pwd + salt).encode("utf-8"))
     return md5_obj.hexdigest()
 
+
+def encode_utf8(_str):
+    """
+    转码
+    :param _str:
+    :return:
+    """
+    res = _str.encode('latin1').decode("utf-8")
+    return res
+
 ####################################################################################################
 
 
