@@ -4,6 +4,10 @@ __author__ = "gaunt"
 import enum
 
 
+# layui页面框架的表格成功标识
+layui_table_code = 0
+
+
 class BaseEnum(enum.Enum):
     pass
 
@@ -19,21 +23,21 @@ class ResultEnum(BaseEnum):
     login_error = {"code": 1000, "msg": "用户名或密码失败"}
 
 
-def success_result(data=None):
+def success_result(data=None, code=None):
     value = ResultEnum.success.value
     return {
-        "code": value["code"],
+        "code": code if code is not None else value["code"],
         "msg": value["msg"],
-        "data": data if data else ""
+        "data": data if data is not None else ""
     }
 
 
 def error_result(data=None, code=None, msg=None):
     value = ResultEnum.error.value
     return {
-        "code": code if code else value["code"],
-        "msg": msg if msg else value["msg"],
-        "data": data if data else ""
+        "code": code if code is not None else value["code"],
+        "msg": msg if msg is not None else value["msg"],
+        "data": data if data is not None else ""
     }
 
 

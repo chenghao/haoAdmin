@@ -3,7 +3,7 @@ __author__ = "gaunt"
 
 from json import dumps
 
-from bottle import Bottle, JSONPlugin
+from bottle import Bottle, JSONPlugin, request
 from webargs import fields
 from webargs.bottleparser import use_kwargs
 import conf
@@ -51,3 +51,10 @@ def login(username, password):
             return ResultEnum.error.value
     else:
         return ResultEnum.login_error.value
+
+
+@login_app.get("/test")
+def test():
+    abc = request.params.getunicode("abc")
+    print(abc)
+    return ResultEnum.success.value

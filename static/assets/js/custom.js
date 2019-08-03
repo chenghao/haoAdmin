@@ -37,42 +37,36 @@ function closeLoadWait() {
  * 删除时的提示框
  * @param url
  * @param param
- * @param admin
+ * @param jquery
  * @param callback
  */
-function confirmDel(url, param, admin, callback) {
-    _confirm('确定删除此数据吗？', url, param, admin, callback, 'DELETE');
-}
-function confirmDel(title, url, param, admin, callback) {
-    _confirm(title, url, param, admin, callback, 'DELETE');
+function confirmDel(jquery, url, param, callback, title) {
+    if(!title) title = '确定删除此数据吗？';
+    _confirm(jquery, title, url, param, callback, 'DELETE');
 }
 
 /**
  * 新增时的提示框
  * @param url
  * @param param
- * @param admin
+ * @param jquery
  * @param callback
  */
-function confirmAdd(url, param, admin, callback) {
-    _confirm('确定新增此数据吗？', url, param, admin, callback, 'POST');
-}
-function confirmAdd(title, url, param, admin, callback) {
-    _confirm(title, url, param, admin, callback, 'POST');
+function confirmAdd(jquery, url, param, callback, title) {
+    if(!title) title = '确定新增此数据吗？';
+    _confirm(jquery, title, url, param, callback, 'POST');
 }
 
 /**
  * 编辑时的提示框
  * @param url
  * @param param
- * @param admin
+ * @param jquery
  * @param callback
  */
-function confirmEdit(url, param, admin, callback) {
-    _confirm('确定编辑此数据吗？', url, param, admin, callback, 'PUT');
-}
-function confirmEdit(title, url, param, admin, callback) {
-    _confirm(title, url, param, admin, callback, 'PUT');
+function confirmEdit(jquery, url, param, callback, title) {
+    if(!title) title = '确定编辑此数据吗？';
+    _confirm(jquery, title, url, param, callback, 'PUT');
 }
 
 /**
@@ -80,111 +74,46 @@ function confirmEdit(title, url, param, admin, callback) {
  * @param title
  * @param url
  * @param param
- * @param admin
+ * @param jquery
  * @param callback
  * @param method
  * @private
  */
-function _confirm(title, url, param, admin, callback, method) {
+function _confirm(jquery, title, url, param, callback, method) {
     layer.confirm(title, {
+        offset: '65px',
         skin: 'layui-layer-admin'
     }, function (i) {
         layer.close(i);
 
-        _req(url, param, admin, function (data) {
+        jqueryAjax(jquery, url, param, function (data) {
             if(callback){
                 callback(data);
             }
         }, method);
     });
 }
-////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * 新增请求
- * @param url
- * @param param
- * @param admin
- * @param callback
- */
-function reqAdd(url, param, admin, callback) {
-    _req(url, param, admin, callback, "POST");
-}
-
-/**
- * 编辑请求
- * @param url
- * @param param
- * @param admin
- * @param callback
- */
-function reqEdit(url, param, admin, callback) {
-    _req(url, param, admin, callback, "PUT");
-}
-
-/**
- * 获取请求
- * @param url
- * @param param
- * @param admin
- * @param callback
- */
-function reqGet(url, param, admin, callback) {
-    _req(url, param, admin, callback, "GET");
-}
-function reqGet(url, param, admin, callback, hideSuccessMsg) {
-    _req(url, param, admin, callback, "GET", hideSuccessMsg);
-}
-
-/**
- * 请求
- * @param url
- * @param param
- * @param admin
- * @param callback
- * @param method
- */
-function _req(url, param, admin, callback, method, hideSuccessMsg, hideLoad) {
-    if(!hideLoad){
-        loadWait();
-    }
-    admin.req(url, param, function (data) {
-        closeLoadWait();
-        admin.removeLoading();  // 移除页面加载动画
-
-        if (data.code == 200) {
-            if(!hideSuccessMsg){
-                success(data.msg);
-            }
-
-            if(callback){
-                callback(data);
-            }
-        } else {
-            error(data.msg);
-        }
-    }, method);
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * 打开窗口
- * @param admin
+ * @param jquery
  * @param area
  * @param title
  * @param id
  * @param callback
  */
-function openWindow(admin, area, title, id, callback, jq) {
-    admin.open({
+function openWindow(jquery, area, title, id, callback) {
+    layer.open({
+        skin: 'layui-layer-admin',
         type: 1,
         area: area,
         offset: '65px',
         title: title,
-        content: jq('#' + id).html(),
+        content: jquery(id).html(),
         success: function (layero, index) {
-            jq(layero).children('.layui-layer-content').css('overflow', 'visible');
+            jquery(layero).children('.layui-layer-content').css('overflow', 'visible');
 
             if(callback){
                 callback();
@@ -221,10 +150,11 @@ function jqueryAjax(jquery, url, param, callback, method, notLoad, hideSuccessMs
             xhr.setRequestHeader('Authorization', 'JWT ' + layui.config.getToken());
         },
         success: function (data) {
+            console.log("==================")
             console.log(url);
             console.log(data);
             console.log("==================")
-            if(data.code == 200){
+            if(data.code == 200 || data.code == 0){
                 if(!hideSuccessMsg) success(data.msg);
 
                 if(callback) callback(data);
@@ -233,12 +163,44 @@ function jqueryAjax(jquery, url, param, callback, method, notLoad, hideSuccessMs
             }
         },
         error: function(jqXHR, textStatus, errorThrown){
-            console.log(jqXHR)
-            console.log(textStatus)
-            console.log(errorThrown)
+            // console.log(textStatus);
+            // console.log(errorThrown);
+            if(jqXHR.hasOwnProperty("responseJSON")){
+                var json = jqXHR.responseJSON;
+                if(json.hasOwnProperty("msg")){
+                    error(json.msg);
+                }
+            }
         },
         complete: function () {
             closeLoadWait();
         }
     });
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+function table_render(table, id, url, cols, opts, parseData) {
+    var opt = {
+        elem: id,
+        url: layui.config.base_server + url,
+        headers: {
+            'Authorization': 'JWT ' + layui.config.getToken()
+        },
+        cellMinWidth: 100,
+        cols: cols,
+        parseData: function (res) {
+            if(parseData) parseData(res);
+        }
+    };
+
+    if(!opts) opts = {};
+    opt["page"] = opts.hasOwnProperty("page") ? opts["page"] : true;
+    opt["limit"] = opts.hasOwnProperty("limit") ? opts["limit"] : 10;
+    opt["limits"] = opts.hasOwnProperty("limits") ? opts["limits"] : [10,30,50];
+    if(opts.hasOwnProperty("toolbar")) opt["toolbar"] = opts["toolbar"];
+    if(opts.hasOwnProperty("defaultToolbar")) opt["defaultToolbar"] = opts["defaultToolbar"];
+    if(opts.hasOwnProperty("height")) opt["height"] = opts["height"];
+
+    var result = table.render(opt);
+    return result;
 }

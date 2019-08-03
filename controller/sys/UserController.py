@@ -29,7 +29,7 @@ def info():
             'nick_name': user.nick_name,
             'state': user.state
         }
-        return success_result(result_user)
+        return success_result(data=result_user)
     else:
         return error_result(msg="用户为空")
 
@@ -41,7 +41,7 @@ psw_args = {
 
 
 @user_app.put('/psw', apply=use_kwargs(psw_args))
-@utils.permissions_auth("put:/v1/user/psw")
+@utils.permissions_auth("put:/v1/sys/user/psw")
 def psw(old_psw, new_psw):
     """
     修改密码
