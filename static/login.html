@@ -42,6 +42,7 @@
     </div>
 </div>
 
+<script type="text/javascript" src="assets/libs/jquery/jquery-3.2.1.min.js"></script>
 <script type="text/javascript" src="assets/libs/layui/layui.js"></script>
 <script type="text/javascript" src="assets/js/store2.js"></script>
 <script type="text/javascript" src="assets/js/custom.js"></script>
@@ -60,7 +61,7 @@
         // 表单提交
         form.on('submit(login-submit)', function (obj) {
             var url = 'sys/login/login';
-            jqueryAjaxPOST($, url, obj.field, function (data) {
+            jqueryAjaxPOST(url, obj.field, function (data) {
                 // 保存token
                 config.putToken(data.token);
 

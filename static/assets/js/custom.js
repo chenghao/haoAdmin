@@ -37,36 +37,33 @@ function closeLoadWait() {
  * 删除时的提示框
  * @param url
  * @param param
- * @param jquery
  * @param callback
  */
-function confirmDel(jquery, url, param, callback, title) {
+function confirmDel(url, param, callback, title, notJointBaseServer) {
     if(!title) title = '确定删除此数据吗？';
-    _confirm(jquery, title, url, param, callback, 'DELETE');
+    _confirm(title, url, param, callback, 'DELETE', notJointBaseServer);
 }
 
 /**
  * 新增时的提示框
  * @param url
  * @param param
- * @param jquery
  * @param callback
  */
-function confirmAdd(jquery, url, param, callback, title) {
+function confirmAdd(url, param, callback, title, notJointBaseServer) {
     if(!title) title = '确定新增此数据吗？';
-    _confirm(jquery, title, url, param, callback, 'POST');
+    _confirm(title, url, param, callback, 'POST', notJointBaseServer);
 }
 
 /**
  * 编辑时的提示框
  * @param url
  * @param param
- * @param jquery
  * @param callback
  */
-function confirmEdit(jquery, url, param, callback, title) {
+function confirmEdit(url, param, callback, title, notJointBaseServer) {
     if(!title) title = '确定编辑此数据吗？';
-    _confirm(jquery, title, url, param, callback, 'PUT');
+    _confirm(title, url, param, callback, 'PUT', notJointBaseServer);
 }
 
 /**
@@ -74,23 +71,22 @@ function confirmEdit(jquery, url, param, callback, title) {
  * @param title
  * @param url
  * @param param
- * @param jquery
  * @param callback
  * @param method
  * @private
  */
-function _confirm(jquery, title, url, param, callback, method) {
+function _confirm(title, url, param, callback, method, notJointBaseServer) {
     layer.confirm(title, {
         offset: '65px',
         skin: 'layui-layer-admin'
     }, function (i) {
         layer.close(i);
 
-        jqueryAjax(jquery, url, param, function (data) {
+        jqueryAjax(url, param, function (data) {
             if(callback){
                 callback(data);
             }
-        }, method);
+        }, method, false, false, notJointBaseServer);
     });
 }
 
@@ -98,22 +94,21 @@ function _confirm(jquery, title, url, param, callback, method) {
 
 /**
  * 打开窗口
- * @param jquery
  * @param area
  * @param title
  * @param id
  * @param callback
  */
-function openWindow(jquery, area, title, id, callback) {
+function openWindow(area, title, id, callback) {
     layer.open({
         skin: 'layui-layer-admin',
         type: 1,
         area: area,
         offset: '65px',
         title: title,
-        content: jquery(id).html(),
+        content: $(id).html(),
         success: function (layero, index) {
-            jquery(layero).children('.layui-layer-content').css('overflow', 'visible');
+            $(layero).children('.layui-layer-content').css('overflow', 'visible');
 
             if(callback){
                 callback();
@@ -123,37 +118,40 @@ function openWindow(jquery, area, title, id, callback) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-function jqueryAjaxGET(jquery, url, param, callback, notLoad, hideSuccessMsg) {
-    jqueryAjax(jquery, url, param, callback, "GET", notLoad, hideSuccessMsg)
+function jqueryAjaxGET(url, param, callback, notLoad, hideSuccessMsg, notJointBaseServer) {
+    jqueryAjax(url, param, callback, "GET", notLoad, hideSuccessMsg, notJointBaseServer)
 }
-function jqueryAjaxPOST(jquery, url, param, callback, notLoad, hideSuccessMsg) {
-    jqueryAjax(jquery, url, param, callback, "POST", notLoad, hideSuccessMsg)
+function jqueryAjaxPOST(url, param, callback, notLoad, hideSuccessMsg, notJointBaseServer) {
+    jqueryAjax(url, param, callback, "POST", notLoad, hideSuccessMsg, notJointBaseServer)
 }
-function jqueryAjaxPUT(jquery, url, param, callback, notLoad, hideSuccessMsg) {
-    jqueryAjax(jquery, url, param, callback, "PUT", notLoad, hideSuccessMsg)
+function jqueryAjaxPUT(url, param, callback, notLoad, hideSuccessMsg, notJointBaseServer) {
+    jqueryAjax(url, param, callback, "PUT", notLoad, hideSuccessMsg, notJointBaseServer)
 }
-function jqueryAjaxDELETE(jquery, url, param, callback, notLoad, hideSuccessMsg) {
-    jqueryAjax(jquery, url, param, callback, "DELETE", notLoad, hideSuccessMsg)
+function jqueryAjaxDELETE(url, param, callback, notLoad, hideSuccessMsg, notJointBaseServer) {
+    jqueryAjax(url, param, callback, "DELETE", notLoad, hideSuccessMsg, notJointBaseServer)
 }
 
-function jqueryAjax(jquery, url, param, callback, method, notLoad, hideSuccessMsg) {
+function jqueryAjax(url, param, callback, method, notLoad, hideSuccessMsg, notJointBaseServer) {
     if(!notLoad){ // 为true时就不显示等待框
         loadWait();
     }
+    if(!notJointBaseServer){
+        url = layui.config.base_server + url;
+    }
 
-    jquery.ajax({
-        url: layui.config.base_server + url,
+    $.ajax({
+        url: url,
         type: method ? method : "get",
         data: param ? param : {},
         dataType: "json",
         beforeSend: function (xhr) {
-            xhr.setRequestHeader('Authorization', 'JWT ' + layui.config.getToken());
+            xhr.setRequestHeader('Authorization', 'Bearer ' + layui.config.getToken());
         },
         success: function (data) {
-            console.log("==================")
+            /*console.log("==================")
             console.log(url);
             console.log(data);
-            console.log("==================")
+            console.log("==================")*/
             if(data.code == 200 || data.code == 0){
                 if(!hideSuccessMsg) success(data.msg);
 
@@ -184,7 +182,7 @@ function table_render(table, id, url, cols, opts, parseData) {
         elem: id,
         url: layui.config.base_server + url,
         headers: {
-            'Authorization': 'JWT ' + layui.config.getToken()
+            'Authorization': 'Bearer ' + layui.config.getToken()
         },
         cellMinWidth: 100,
         cols: cols,

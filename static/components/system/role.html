@@ -74,7 +74,6 @@
         var form = layui.form;
         var table = layui.table;
         var util = layui.util;
-        var admin = layui.admin;
         var config = layui.config;
         var tableX = layui.tableX;
 
@@ -125,106 +124,80 @@
 
         // 删除
         function doDelete(obj) {
-            layer.confirm('确定要删除吗？', {
-                offset: '65px',
-                skin: 'layui-layer-admin'
-            }, function (i) {
-                layer.close(i);
-                layer.load();
-                admin.req('role/' + obj.data.roleId, {}, function (res) {
-                    layer.closeAll('loading');
-                    if (res.code == 200) {
-                        layer.msg(res.msg, {icon: 1});
-                        obj.del();
-                    } else {
-                        layer.msg(res.msg, {icon: 2});
-                    }
-                }, 'DELETE');
+            confirmDel('role/' + obj.data.roleId, {}, function (data) {
+                if (data.code == 200) {
+                    success(data.msg);
+
+                    obj.del();
+                } else {
+                    error(data.msg);
+                }
             });
         }
 
         // 显示编辑弹窗
         function showEditModel(data) {
-            admin.open({
-                type: 1,
-                area: '360px',
-                offset: '65px',
-                title: data ? '修改角色' : '添加角色',
-                content: $('#roleForm').html(),
-                success: function () {
-                    form.val('roleForm', data);
-                    // 表单提交事件
-                    form.on('submit(roleFormSubmit)', function (d) {
-                        layer.load();
-                        admin.req('role', d.field, function (res) {
-                            layer.closeAll('loading');
-                            if (res.code == 200) {
-                                layer.msg(res.msg, {icon: 1});
-                                table.reload('roleTable');
-                                layer.closeAll('page');
-                            } else {
-                                layer.msg(res.msg, {icon: 2});
-                            }
-                        }, data ? 'PUT' : 'POST');
-                        return false;
-                    });
-                }
+            openWindow('360px', data ? '修改角色' : '添加角色', '#roleForm', function () {
+                form.val('roleForm', data);
+                // 表单提交事件
+                form.on('submit(roleFormSubmit)', function (d) {
+                    jqueryAjax('role', d.field, function (res) {
+                        if (res.code == 200) {
+                            success(res.msg);
+
+                            table.reload('roleTable');
+                            layer.closeAll('page');
+                        } else {
+                            error(res.msg);
+                        }
+                    }, data ? 'PUT' : 'POST');
+                    return false;
+                });
             });
         }
 
         // 权限管理
         function showPermDialog(roleId) {
-            admin.open({
-                type: 1,
-                area: '650px',
-                offset: '65px',
-                title: '角色权限管理',
-                content: $('#authModel').html(),
-                success: function () {
-                    // 渲染表格
-                    table.render({
-                        elem: '#roleAuthTable',
-                        url: config.base_server + 'authorities',
-                        where: {
-                            access_token: config.getToken(),
-                            roleId: roleId
-                        },
-                        page: false,
-                        height: 400,
-                        cols: [[
-                            {type: 'numbers'},
-                            {field: 'parentName', sort: true, title: '模块', width: 115},
-                            {field: 'authorityName', sort: true, title: '接口名称', unresize: true, width: 165},
-                            {field: 'authority', sort: true, title: '权限标识', unresize: true},
-                            {templet: '#authState', title: '授权', unresize: true, width: 90}
-                        ]],
-                        done: function (res, curr, count) {
-                            tableX.merges('roleAuthTable', [1], ['parentName']);
-                            $("table").css("border-collapse", "inherit");
-                        }
-                    });
+            openWindow('650px', '角色权限管理', '#authModel', function () {
+                // 渲染表格
+                table.render({
+                    elem: '#roleAuthTable',
+                    url: config.base_server + 'authorities',
+                    where: {
+                        access_token: config.getToken(),
+                        roleId: roleId
+                    },
+                    page: false,
+                    height: 400,
+                    cols: [[
+                        {type: 'numbers'},
+                        {field: 'parentName', sort: true, title: '模块', width: 115},
+                        {field: 'authorityName', sort: true, title: '接口名称', unresize: true, width: 165},
+                        {field: 'authority', sort: true, title: '权限标识', unresize: true},
+                        {templet: '#authState', title: '授权', unresize: true, width: 90}
+                    ]],
+                    done: function (res, curr, count) {
+                        tableX.merges('roleAuthTable', [1], ['parentName']);
+                        $("table").css("border-collapse", "inherit");
+                    }
+                });
 
-                    // 监听授权开关
-                    form.on('switch(authState)', function (obj) {
-                        layer.load();
-                        admin.req('authorities/role', {
-                            roleId: roleId,
-                            authId: obj.value
-                        }, function (res) {
-                            layer.closeAll('loading');
-                            if (res.code == 200) {
-                                layer.msg(res.msg, {icon: 1});
-                            } else {
-                                layer.msg(res.msg, {icon: 2});
-                                $(obj.elem).prop('checked', !obj.elem.checked);
-                                form.render('checkbox');
-                            }
-                        }, obj.elem.checked ? 'POST' : 'DELETE');
-                    });
-                    // 去掉margin
-                    $('#roleAuthTable').css('margin', '0');
-                    $('#roleAuthTable+.layui-table-view').css('margin', '0');
-                }
+                // 监听授权开关
+                form.on('switch(authState)', function (obj) {
+                    jqueryAjax('authorities/role', {roleId: roleId, authId: obj.value}, function (res) {
+                        if (res.code == 200) {
+                            success(res.msg);
+                        } else {
+                            error(res.msg);
+
+                            $(obj.elem).prop('checked', !obj.elem.checked);
+                            form.render('checkbox');
+                        }
+                    }, obj.elem.checked ? 'POST' : 'DELETE');
+                });
+                // 去掉margin
+                $('#roleAuthTable').css('margin', '0');
+                $('#roleAuthTable+.layui-table-view').css('margin', '0');
             });
         }
 

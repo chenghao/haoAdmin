@@ -127,14 +127,20 @@
 
         // 删除
         function doDelete(obj) {
-            confirmDel($, "sys/menu/del", {menu_id: obj.data.menu_id}, function (data) {
-                obj.del();
+            confirmDel("sys/menu/del", {menu_id: obj.data.menu_id}, function (data) {
+                if (data.code == 200) {
+                    success(data.msg);
+
+                    obj.del();
+                } else {
+                    error(data.msg);
+                }
             });
         }
 
         // 显示编辑弹窗
         function showEditModel(menu) {
-            openWindow($, '360px', (menu ? '修改' : '添加') + '菜单', "#menuForm", function () {
+            openWindow('360px', (menu ? '修改' : '添加') + '菜单', "#menuForm", function () {
                 $('select[name="parent_id"]').html('<option value="">请选择</option>');
                 for (var i = 0; i < mMenus.length; i++) {
                     $('select[name="parent_id"]').append('<option value="' + mMenus[i].menu_id + '">' + mMenus[i].menu_name + '</option>');
@@ -144,9 +150,15 @@
 
                 // 表单提交事件
                 form.on('submit(menuFormSubmit)', function (data) {
-                    jqueryAjax($, "sys/menu/addOrUpMenu", data.field, function (data) {
-                        menuIns.reload();
-                        layer.closeAll('page');
+                    jqueryAjax("sys/menu/addOrUpMenu", data.field, function (data) {
+                        if (data.code == 200) {
+                            success(data.msg);
+
+                            menuIns.reload();
+                            layer.closeAll('page');
+                        } else {
+                            error(data.msg);
+                        }
                     }, menu ? 'PUT' : 'POST');
                     return false;
                 });
@@ -154,9 +166,13 @@
         }
 
         // 获取全部菜单
-        /*jqueryAjaxGET($, 'sys/menu/list', {}, function (data) {
-            mMenus = data.data;
-        }, true, true);*/
+        jqueryAjaxGET('sys/menu/list', {}, function (data) {
+            if (data.code == 0) {
+                mMenus = data.data;
+            } else {
+                error(data.msg);
+            }
+        }, true, true);
 
     });
 </script>
